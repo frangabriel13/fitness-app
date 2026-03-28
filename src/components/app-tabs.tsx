@@ -19,12 +19,12 @@ interface TabButtonProps extends TabTriggerSlotProps {
 
 function TabButton({ icon, iconFocused, label, isFocused, ...props }: TabButtonProps) {
   const theme = useTheme();
-  const color = isFocused ? theme.text : theme.textSecondary;
+  const color = isFocused ? theme.accent : theme.textSecondary;
 
   return (
     <Pressable {...props} style={styles.tabButton}>
       <Ionicons name={isFocused ? iconFocused : icon} size={24} color={color} />
-      <ThemedText type="small" themeColor={isFocused ? 'text' : 'textSecondary'}>
+      <ThemedText type="small" themeColor={isFocused ? 'accent' : 'textSecondary'}>
         {label}
       </ThemedText>
     </Pressable>
