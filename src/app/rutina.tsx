@@ -1,4 +1,3 @@
-import { FontAwesome6 } from '@expo/vector-icons';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
@@ -6,10 +5,12 @@ import { MOCK_PROGRAM } from '@/data/mock-program';
 import { useTheme } from '@/hooks/use-theme';
 import { useProgramStore } from '@/stores/program-store';
 import { useWorkoutStore } from '@/stores/workout-store';
-import { generateAllWorkoutLogs } from '@/utils/workout';
 import type { TrainingDay, WorkoutStatus } from '@/types';
+import { generateAllWorkoutLogs } from '@/utils/workout';
+import { FontAwesome6 } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 // ─── Day card ────────────────────────────────────────────────────────────────
 
@@ -46,11 +47,9 @@ function DayCard({ day, status }: DayCardProps) {
       {/* Info */}
       <View style={styles.dayInfo}>
         <ThemedText type="subtitle">{day.name}</ThemedText>
-        <View style={styles.dayMeta}>
-          <ThemedText type="small" themeColor="textSecondary">
-            {day.exercises.length} ejercicios · {totalSets} series
-          </ThemedText>
-        </View>
+        <ThemedText type="small" themeColor="textSecondary">
+          {day.exercises.length} ejercicios · {totalSets} series
+        </ThemedText>
       </View>
 
       {/* Status */}
@@ -68,13 +67,13 @@ function DayCard({ day, status }: DayCardProps) {
 
 export default function RutinaScreen() {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   const [selectedWeek, setSelectedWeek] = useState(1);
 
   const program = useProgramStore((s) => s.currentProgram) ?? MOCK_PROGRAM;
   const workoutLogs = useWorkoutStore((s) => s.workoutLogs);
   const setWorkoutLogs = useWorkoutStore((s) => s.setWorkoutLogs);
 
-  // Initialize logs if empty
   useEffect(() => {
     if (Object.keys(workoutLogs).length === 0) {
       setWorkoutLogs(generateAllWorkoutLogs(program));
@@ -88,100 +87,86 @@ export default function RutinaScreen() {
   return (
     <ThemedView style={styles.screen}>
       <ScrollView
-        contentContainerStyle={[styles.container, { paddingBottom: BottomTabInset + Spacing.four }]}
+        contentContainerStyle={[
+          styles.container,
+          { paddingTop: insets.top + Spacing.two, paddingBottom: BottomTabInset + Spacing.four },
+        ]}
         showsVerticalScrollIndicator={false}>
 
         {/* Header */}
         <View style={styles.header}>
-          <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
-            PROGRAMA ACTUAL
-          </ThemedText>
-          <ThemedText type="title" style={styles.title}>
-            Mi Rutina
-          </ThemedText>
-          <View style={[styles.programBadge, { backgroundColor: theme.backgroundElement }]}>
-            <ThemedText type="smallBold" themeColor="accent">
-              {name}
-            </ThemedText>
+          <View style={styles.titleRow}>
+            <ThemedText type="title" style={styles.titleWhite}>MI </ThemedText>
+            <ThemedText type="title" style={[styles.titleWhite, { color: theme.accent }]}>RUTINA</ThemedText>
           </View>
-        </View>
-
-        {/* Duration card */}
-        <View style={[styles.durationCard, { backgroundColor: theme.backgroundElement }]}>
-          <View style={styles.durationRow}>
-            <View style={[styles.durationDot, { backgroundColor: theme.accent }]} />
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              DURACIÓN DEL MACROCICLO
-            </ThemedText>
-          </View>
-          <ThemedText type="title" style={styles.durationNumber}>
-            {totalWeeks}{' '}
-            <ThemedText type="subtitle" themeColor="textSecondary">
-              semanas
-            </ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            {name} · {totalWeeks} semanas
           </ThemedText>
         </View>
 
         {/* Week selector */}
-        <View style={styles.sectionHeader}>
-          <ThemedText type="smallBold" themeColor="textSecondary">
-            SEMANAS
-          </ThemedText>
-          <ThemedText type="small" themeColor="accent">
-            Semana {selectedWeek} seleccionada
-          </ThemedText>
-        </View>
-
-        <View style={styles.weekGrid}>
-          {weeks.map((week) => {
-            const isSelected = week === selectedWeek;
-            return (
-              <Pressable
-                key={week}
-                onPress={() => setSelectedWeek(week)}
-                style={({ pressed }) => [
-                  styles.weekChip,
-                  {
-                    backgroundColor: isSelected ? theme.accent : theme.backgroundElement,
-                    borderColor: isSelected ? theme.accent : 'transparent',
-                    opacity: pressed ? 0.75 : 1,
-                  },
-                ]}>
-                <ThemedText
-                  type="smallBold"
-                  style={[
-                    styles.weekChipNumber,
-                    { color: isSelected ? theme.background : theme.textSecondary },
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <ThemedText type="smallBold" themeColor="textSecondary">
+              SEMANAS
+            </ThemedText>
+            <ThemedText type="small" themeColor="accent">
+              Semana {selectedWeek} seleccionada
+            </ThemedText>
+          </View>
+          <View style={styles.weekGrid}>
+            {weeks.map((week) => {
+              const isSelected = week === selectedWeek;
+              return (
+                <Pressable
+                  key={week}
+                  onPress={() => setSelectedWeek(week)}
+                  style={({ pressed }) => [
+                    styles.weekChip,
+                    {
+                      backgroundColor: isSelected ? theme.accent : theme.backgroundElement,
+                      borderColor: isSelected ? theme.accent : 'transparent',
+                      opacity: pressed ? 0.75 : 1,
+                    },
                   ]}>
-                  {week}
-                </ThemedText>
-                <ThemedText
-                  type="small"
-                  style={{ color: isSelected ? theme.background : theme.textSecondary, opacity: 0.8 }}>
-                  sem
-                </ThemedText>
-              </Pressable>
-            );
-          })}
+                  <ThemedText
+                    type="smallBold"
+                    style={[
+                      styles.weekChipNumber,
+                      { color: isSelected ? theme.background : theme.textSecondary },
+                    ]}>
+                    {week}
+                  </ThemedText>
+                  <ThemedText
+                    type="small"
+                    style={{ color: isSelected ? theme.background : theme.textSecondary, opacity: 0.8 }}>
+                    sem
+                  </ThemedText>
+                </Pressable>
+              );
+            })}
+          </View>
         </View>
 
         {/* Days for selected week */}
-        <View style={styles.sectionHeader}>
-          <ThemedText type="smallBold" themeColor="textSecondary">
-            DÍAS — SEMANA {selectedWeek}
-          </ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
-            {days.length} días
-          </ThemedText>
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <ThemedText type="smallBold" themeColor="textSecondary">
+              DÍAS — SEMANA {selectedWeek}
+            </ThemedText>
+            <ThemedText type="small" themeColor="textSecondary">
+              {days.length} días
+            </ThemedText>
+          </View>
+          <View style={styles.daysList}>
+            {days.map((day) => {
+              const logKey = `${day.id}_w${selectedWeek}`;
+              const status = workoutLogs[logKey]?.status ?? 'not_started';
+              return <DayCard key={day.id} day={day} status={status} />;
+            })}
+          </View>
         </View>
 
-        <View style={styles.daysList}>
-          {days.map((day) => {
-            const logKey = `${day.id}_w${selectedWeek}`;
-            const status = workoutLogs[logKey]?.status ?? 'not_started';
-            return <DayCard key={day.id} day={day} status={status} />;
-          })}
-        </View>
       </ScrollView>
     </ThemedView>
   );
@@ -192,45 +177,26 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    padding: Spacing.three,
+    paddingHorizontal: Spacing.two,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
     gap: Spacing.three,
   },
   header: {
-    paddingTop: Spacing.four,
-    gap: Spacing.two,
+    gap: 0,
   },
-  eyebrow: {
-    letterSpacing: 1.5,
-  },
-  title: {
-    fontSize: 36,
-  },
-  programBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one,
-    borderRadius: Spacing.three,
-  },
-  durationCard: {
-    borderRadius: Spacing.three,
-    padding: Spacing.three,
-    gap: Spacing.two,
-  },
-  durationRow: {
+  titleRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'baseline',
+  },
+  titleWhite: {
+    fontSize: 36,
+    lineHeight: 38,
+    color: '#F5F5F5',
+  },
+  section: {
     gap: Spacing.two,
-  },
-  durationDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  durationNumber: {
-    fontSize: 40,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -244,43 +210,39 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   weekChip: {
-    width: 64,
-    height: 64,
+    width: 56,
+    height: 56,
     borderRadius: Spacing.two,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
+    gap: 1,
   },
   weekChipNumber: {
-    fontSize: 20,
+    fontSize: 18,
   },
   daysList: {
-    gap: Spacing.two,
+    gap: Spacing.one,
   },
   dayCard: {
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: Spacing.two,
     borderLeftWidth: 3,
-    padding: Spacing.three,
-    gap: Spacing.three,
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.two,
+    gap: Spacing.two,
   },
   dayNumber: {
-    width: 36,
-    height: 36,
+    width: 34,
+    height: 34,
     borderRadius: Spacing.one,
     alignItems: 'center',
     justifyContent: 'center',
   },
   dayInfo: {
     flex: 1,
-    gap: Spacing.half,
-  },
-  dayMeta: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.one,
+    gap: 1,
   },
   statusBadge: {
     alignItems: 'center',
