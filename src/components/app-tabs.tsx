@@ -36,7 +36,7 @@ function BottomTabBar({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.tabBar, { backgroundColor: theme.background, paddingBottom: insets.bottom || Spacing.two }]}>
+    <View style={[styles.tabBar, { backgroundColor: theme.backgroundElement, paddingBottom: insets.bottom || Spacing.two }]}>
       <View style={styles.tabBarInner}>{children}</View>
     </View>
   );

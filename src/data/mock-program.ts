@@ -2,7 +2,7 @@ import type { Program } from '@/types';
 
 export const MOCK_PROGRAM: Program = {
   id: 'prog_001',
-  name: 'Hipertrofia - Fase 1',
+  name: 'Hipertrofia',
   totalWeeks: 8,
   clientId: 'client_001',
   trainerId: 'trainer_001',

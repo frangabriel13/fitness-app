@@ -93,32 +93,12 @@ export default function RutinaScreen() {
 
         {/* Header */}
         <View style={styles.header}>
-          <ThemedText type="small" themeColor="textSecondary" style={styles.eyebrow}>
-            PROGRAMA ACTUAL
-          </ThemedText>
-          <ThemedText type="title" style={styles.title}>
-            Mi Rutina
-          </ThemedText>
-          <View style={[styles.programBadge, { backgroundColor: theme.backgroundElement }]}>
-            <ThemedText type="smallBold" themeColor="accent">
-              {name}
-            </ThemedText>
+          <View style={styles.titleRow}>
+            <ThemedText type="title" style={styles.titleWhite}>MI </ThemedText>
+            <ThemedText type="title" style={[styles.titleWhite, { color: theme.accent }]}>RUTINA</ThemedText>
           </View>
-        </View>
-
-        {/* Duration card */}
-        <View style={[styles.durationCard, { backgroundColor: theme.backgroundElement }]}>
-          <View style={styles.durationRow}>
-            <View style={[styles.durationDot, { backgroundColor: theme.accent }]} />
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              DURACIÓN DEL MACROCICLO
-            </ThemedText>
-          </View>
-          <ThemedText type="title" style={styles.durationNumber}>
-            {totalWeeks}{' '}
-            <ThemedText type="subtitle" themeColor="textSecondary">
-              semanas
-            </ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            {name} · {totalWeeks} semanas
           </ThemedText>
         </View>
 
@@ -200,37 +180,15 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingTop: Spacing.four,
-    gap: Spacing.two,
+    gap: Spacing.half,
   },
-  eyebrow: {
-    letterSpacing: 1.5,
-  },
-  title: {
-    fontSize: 36,
-  },
-  programBadge: {
-    alignSelf: 'flex-start',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one,
-    borderRadius: Spacing.three,
-  },
-  durationCard: {
-    borderRadius: Spacing.three,
-    padding: Spacing.three,
-    gap: Spacing.two,
-  },
-  durationRow: {
+  titleRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
+    alignItems: 'baseline',
   },
-  durationDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  durationNumber: {
-    fontSize: 40,
+  titleWhite: {
+    fontSize: 36,
+    color: '#F5F5F5',
   },
   sectionHeader: {
     flexDirection: 'row',
