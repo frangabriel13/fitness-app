@@ -5,12 +5,109 @@ import { MOCK_PROGRAM } from '@/data/mock-program';
 import { useTheme } from '@/hooks/use-theme';
 import { useProgramStore } from '@/stores/program-store';
 import { useWorkoutStore } from '@/stores/workout-store';
-import type { TrainingDay, WorkoutStatus } from '@/types';
+import type { TrainingDay, WorkoutLog, WorkoutStatus } from '@/types';
 import { generateAllWorkoutLogs } from '@/utils/workout';
 import { FontAwesome6 } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+type WeekStatus = 'completed' | 'active' | 'upcoming';
+
+function getWeekStatus(
+  week: number,
+  days: TrainingDay[],
+  logs: Record<string, WorkoutLog>
+): WeekStatus {
+  const statuses = days.map((d) => logs[`${d.id}_w${week}`]?.status ?? 'not_started');
+  if (statuses.every((s) => s === 'completed')) return 'completed';
+  if (statuses.some((s) => s !== 'not_started')) return 'active';
+  return 'upcoming';
+}
+
+function getCurrentWeek(
+  totalWeeks: number,
+  days: TrainingDay[],
+  logs: Record<string, WorkoutLog>
+): number {
+  for (let w = 1; w <= totalWeeks; w++) {
+    const allDone = days.every((d) => logs[`${d.id}_w${w}`]?.status === 'completed');
+    if (!allDone) return w;
+  }
+  return totalWeeks;
+}
+
+// ─── Week chip ────────────────────────────────────────────────────────────────
+
+const CHIP_WIDTH = 58;
+const CHIP_GAP = 6;
+
+interface WeekChipProps {
+  week: number;
+  weekStatus: WeekStatus;
+  isSelected: boolean;
+  isCurrent: boolean;
+  onPress: () => void;
+}
+
+function WeekChip({ week, weekStatus, isSelected, isCurrent, onPress }: WeekChipProps) {
+  const theme = useTheme();
+
+  const bgColor = isSelected
+    ? theme.accent
+    : weekStatus === 'completed'
+      ? theme.backgroundSelected
+      : theme.backgroundElement;
+
+  const borderColor = !isSelected && isCurrent ? theme.accent : 'transparent';
+
+  const numberColor = isSelected
+    ? theme.background
+    : isCurrent
+      ? theme.accent
+      : weekStatus === 'completed'
+        ? theme.accentSubtle
+        : weekStatus === 'upcoming'
+          ? theme.textSecondary + '55'
+          : theme.textSecondary;
+
+  const labelColor = isSelected
+    ? theme.background
+    : isCurrent
+      ? theme.accent
+      : theme.textSecondary + '77';
+
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [{ opacity: pressed ? 0.65 : 1 }]}>
+      <View style={[styles.chip, { backgroundColor: bgColor, borderColor }]}>
+        {/* Status icon zone */}
+        <View style={styles.chipIconZone}>
+          {weekStatus === 'completed' && !isSelected && (
+            <FontAwesome6 name="check" size={9} color="#4CAF50" solid />
+          )}
+          {isCurrent && !isSelected && (
+            <View style={[styles.chipDot, { backgroundColor: theme.accent }]} />
+          )}
+          {isSelected && (
+            <View style={[styles.chipDot, { backgroundColor: theme.background }]} />
+          )}
+        </View>
+
+        {/* Week number */}
+        <ThemedText style={[styles.chipNumber, { color: numberColor }]}>
+          {week}
+        </ThemedText>
+
+        {/* Label */}
+        <ThemedText style={[styles.chipLabel, { color: labelColor }]}>
+          {isCurrent && !isSelected ? 'HOY' : 'sem'}
+        </ThemedText>
+      </View>
+    </Pressable>
+  );
+}
 
 // ─── Day card ────────────────────────────────────────────────────────────────
 
@@ -32,27 +129,18 @@ function DayCard({ day, status }: DayCardProps) {
   const totalSets = day.exercises.reduce((acc, ex) => acc + ex.sets, 0);
 
   return (
-    <View
-      style={[
-        styles.dayCard,
-        { backgroundColor: theme.backgroundElement, borderLeftColor: color },
-      ]}>
-      {/* Day number bubble */}
+    <View style={[styles.dayCard, { backgroundColor: theme.backgroundElement, borderLeftColor: color }]}>
       <View style={[styles.dayNumber, { backgroundColor: theme.backgroundSelected }]}>
         <ThemedText type="smallBold" themeColor="textSecondary">
           D{day.dayNumber}
         </ThemedText>
       </View>
-
-      {/* Info */}
       <View style={styles.dayInfo}>
         <ThemedText type="subtitle">{day.name}</ThemedText>
         <ThemedText type="small" themeColor="textSecondary">
           {day.exercises.length} ejercicios · {totalSets} series
         </ThemedText>
       </View>
-
-      {/* Status */}
       <View style={styles.statusBadge}>
         <FontAwesome6 name={icon as any} solid size={14} color={color} />
         <ThemedText type="small" style={{ color }}>
@@ -68,7 +156,7 @@ function DayCard({ day, status }: DayCardProps) {
 export default function RutinaScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const [selectedWeek, setSelectedWeek] = useState(1);
+  const weekScrollRef = useRef<ScrollView>(null);
 
   const program = useProgramStore((s) => s.currentProgram) ?? MOCK_PROGRAM;
   const workoutLogs = useWorkoutStore((s) => s.workoutLogs);
@@ -81,8 +169,20 @@ export default function RutinaScreen() {
   }, []);
 
   const { totalWeeks, name, microcycle } = program;
-  const weeks = Array.from({ length: totalWeeks }, (_, i) => i + 1);
   const days = microcycle.trainingDays;
+
+  const currentWeek = getCurrentWeek(totalWeeks, days, workoutLogs);
+  const [selectedWeek, setSelectedWeek] = useState(currentWeek);
+
+  const weeks = Array.from({ length: totalWeeks }, (_, i) => i + 1);
+  const completedCount = weeks.filter((w) => getWeekStatus(w, days, workoutLogs) === 'completed').length;
+  const progressRatio = completedCount / totalWeeks;
+
+  // Auto-scroll to current week
+  useEffect(() => {
+    const x = Math.max(0, (currentWeek - 2) * (CHIP_WIDTH + CHIP_GAP));
+    weekScrollRef.current?.scrollTo({ x, animated: false });
+  }, [currentWeek]);
 
   return (
     <ThemedView style={styles.screen}>
@@ -106,46 +206,47 @@ export default function RutinaScreen() {
 
         {/* Week selector */}
         <View style={styles.section}>
+          {/* Section header */}
           <View style={styles.sectionHeader}>
-            <ThemedText type="smallBold" themeColor="textSecondary">
-              SEMANAS
-            </ThemedText>
-            <ThemedText type="small" themeColor="accent">
-              Semana {selectedWeek} seleccionada
-            </ThemedText>
+            <ThemedText type="smallBold" themeColor="textSecondary">SEMANAS</ThemedText>
+            <View style={styles.progressLabel}>
+              <View style={[styles.progressDot, { backgroundColor: theme.accent }]} />
+              <ThemedText type="small" themeColor="textSecondary">
+                {completedCount} de {totalWeeks} completadas
+              </ThemedText>
+            </View>
           </View>
-          <View style={styles.weekGrid}>
+
+          {/* Progress bar */}
+          <View style={[styles.progressTrack, { backgroundColor: theme.backgroundSelected }]}>
+            <View
+              style={[
+                styles.progressFill,
+                { backgroundColor: theme.accent, width: `${progressRatio * 100}%` },
+              ]}
+            />
+          </View>
+
+          {/* Week chips */}
+          <ScrollView
+            ref={weekScrollRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.weekStrip}>
             {weeks.map((week) => {
-              const isSelected = week === selectedWeek;
+              const weekStatus = getWeekStatus(week, days, workoutLogs);
               return (
-                <Pressable
+                <WeekChip
                   key={week}
+                  week={week}
+                  weekStatus={weekStatus}
+                  isSelected={week === selectedWeek}
+                  isCurrent={week === currentWeek}
                   onPress={() => setSelectedWeek(week)}
-                  style={({ pressed }) => [
-                    styles.weekChip,
-                    {
-                      backgroundColor: isSelected ? theme.accent : theme.backgroundElement,
-                      borderColor: isSelected ? theme.accent : 'transparent',
-                      opacity: pressed ? 0.75 : 1,
-                    },
-                  ]}>
-                  <ThemedText
-                    type="smallBold"
-                    style={[
-                      styles.weekChipNumber,
-                      { color: isSelected ? theme.background : theme.textSecondary },
-                    ]}>
-                    {week}
-                  </ThemedText>
-                  <ThemedText
-                    type="small"
-                    style={{ color: isSelected ? theme.background : theme.textSecondary, opacity: 0.8 }}>
-                    sem
-                  </ThemedText>
-                </Pressable>
+                />
               );
             })}
-          </View>
+          </ScrollView>
         </View>
 
         {/* Days for selected week */}
@@ -177,7 +278,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    paddingHorizontal: Spacing.two,
+    paddingHorizontal: 12,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
@@ -204,22 +305,59 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.one,
   },
-  weekGrid: {
+  progressLabel: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.two,
+    alignItems: 'center',
+    gap: Spacing.one,
   },
-  weekChip: {
-    width: 56,
-    height: 56,
-    borderRadius: Spacing.two,
+  progressDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+  progressTrack: {
+    height: 3,
+    borderRadius: 2,
+    overflow: 'hidden',
+    marginHorizontal: Spacing.one,
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  weekStrip: {
+    flexDirection: 'row',
+    gap: CHIP_GAP,
+    paddingHorizontal: Spacing.one,
+  },
+  chip: {
+    width: CHIP_WIDTH,
+    height: 70,
+    borderRadius: 10,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
     gap: 1,
   },
-  weekChipNumber: {
-    fontSize: 18,
+  chipIconZone: {
+    height: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chipDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 3,
+  },
+  chipNumber: {
+    fontSize: 20,
+    fontWeight: '700',
+    lineHeight: 24,
+  },
+  chipLabel: {
+    fontSize: 9,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   daysList: {
     gap: Spacing.one,
