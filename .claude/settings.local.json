@@ -4,7 +4,8 @@
       "Bash(npx tsc:*)",
       "Bash(npm install:*)",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d[''''expo''''].get\\(''''splash'''',{}\\), indent=2\\)\\); print\\(json.dumps\\(d[''''expo''''].get\\(''''backgroundColor'''',''''''''\\), indent=2\\)\\)\")",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npx skills:*)"
     ]
   }
 }

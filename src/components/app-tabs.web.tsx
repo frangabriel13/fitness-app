@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { FontAwesome6 } from '@expo/vector-icons';
 import {
   TabList,
   TabListProps,
@@ -16,15 +16,15 @@ import { ThemedView } from './themed-view';
 import { MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
+type FA6IconName = React.ComponentProps<typeof FontAwesome6>['name'];
 
 interface TabButtonProps extends TabTriggerSlotProps {
-  icon: IoniconName;
-  iconFocused: IoniconName;
+  icon: FA6IconName;
+  alwaysSolid?: boolean;
   label: string;
 }
 
-function TabButton({ icon, iconFocused, label, isFocused, ...props }: TabButtonProps) {
+function TabButton({ icon, alwaysSolid, label, isFocused, ...props }: TabButtonProps) {
   const theme = useTheme();
   const color = isFocused ? theme.accent : theme.textSecondary;
 
@@ -33,7 +33,7 @@ function TabButton({ icon, iconFocused, label, isFocused, ...props }: TabButtonP
       <ThemedView
         type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
         style={styles.tabButtonView}>
-        <Ionicons name={isFocused ? iconFocused : icon} size={14} color={color} />
+        <FontAwesome6 name={icon} solid={alwaysSolid ?? isFocused} size={14} color={color} />
         <ThemedText type="small" themeColor={isFocused ? 'accent' : 'textSecondary'}>
           {label}
         </ThemedText>
@@ -59,19 +59,16 @@ export default function AppTabs() {
       <TabList asChild>
         <CustomTabList>
           <TabTrigger name="home" href="/" asChild>
-            <TabButton icon="home-outline" iconFocused="home" label="Inicio" />
+            <TabButton icon="house" label="Inicio" />
           </TabTrigger>
           <TabTrigger name="progreso" href="/progreso" asChild>
-            <TabButton icon="stats-chart-outline" iconFocused="stats-chart" label="Progreso" />
+            <TabButton icon="chart-line" alwaysSolid label="Progreso" />
           </TabTrigger>
           <TabTrigger name="rutina" href="/rutina" asChild>
-            <TabButton icon="barbell-outline" iconFocused="barbell" label="Rutina" />
-          </TabTrigger>
-          <TabTrigger name="buzon" href="/buzon" asChild>
-            <TabButton icon="mail-outline" iconFocused="mail" label="Buzón" />
+            <TabButton icon="dumbbell" alwaysSolid label="Rutina" />
           </TabTrigger>
           <TabTrigger name="perfil" href="/perfil" asChild>
-            <TabButton icon="person-outline" iconFocused="person" label="Perfil" />
+            <TabButton icon="circle-user" label="Perfil" />
           </TabTrigger>
         </CustomTabList>
       </TabList>
