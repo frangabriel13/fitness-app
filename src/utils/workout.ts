@@ -1,5 +1,7 @@
 import type { ActiveSession, Program, SetLog, TrainingDay, WorkoutLog } from '@/types';
 
+export type WeekStatus = 'completed' | 'active' | 'upcoming';
+
 /**
  * Genera un WorkoutLog vacío para un día y semana específicos.
  * Crea SetLogs vacíos para cada serie de cada ejercicio.
@@ -66,4 +68,33 @@ export function createActiveSession(workoutLogId: string): ActiveSession {
     phase: 'exercising',
     restTimeRemaining: 0,
   };
+}
+
+/**
+ * Determina el estado de progreso de una semana basado en sus logs.
+ */
+export function getWeekStatus(
+  week: number,
+  days: TrainingDay[],
+  logs: Record<string, WorkoutLog>
+): WeekStatus {
+  const statuses = days.map((d) => logs[`${d.id}_w${week}`]?.status ?? 'not_started');
+  if (statuses.every((s) => s === 'completed')) return 'completed';
+  if (statuses.some((s) => s !== 'not_started')) return 'active';
+  return 'upcoming';
+}
+
+/**
+ * Retorna la primera semana no completada, o la última si todas están completas.
+ */
+export function getCurrentWeek(
+  totalWeeks: number,
+  days: TrainingDay[],
+  logs: Record<string, WorkoutLog>
+): number {
+  for (let w = 1; w <= totalWeeks; w++) {
+    const allDone = days.every((d) => logs[`${d.id}_w${w}`]?.status === 'completed');
+    if (!allDone) return w;
+  }
+  return totalWeeks;
 }
