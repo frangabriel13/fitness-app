@@ -1,75 +1,120 @@
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
 import type { TrainingDay, WorkoutStatus } from '@/types';
-import { FontAwesome6 } from '@expo/vector-icons';
-import { StyleSheet, View } from 'react-native';
 import { Spacing } from '@/constants/theme';
+import { FontAwesome6 } from '@expo/vector-icons';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 const COLOR_SUCCESS = '#4CAF50';
 
 export interface DayCardProps {
   day: TrainingDay;
   status: WorkoutStatus;
+  onPress?: () => void;
 }
 
-export function DayCard({ day, status }: DayCardProps) {
+export function DayCard({ day, status, onPress }: DayCardProps) {
   const theme = useTheme();
 
-  const statusConfig: Record<WorkoutStatus, { label: string; icon: string; color: string }> = {
-    not_started: { label: 'Pendiente', icon: 'circle', color: theme.textSecondary },
-    in_progress: { label: 'En progreso', icon: 'circle-half-stroke', color: theme.accent },
-    completed: { label: 'Completado', icon: 'circle-check', color: COLOR_SUCCESS },
-  };
+  const statusColor =
+    status === 'completed'
+      ? COLOR_SUCCESS
+      : status === 'in_progress'
+        ? theme.accent
+        : theme.backgroundSelected;
 
-  const { label, icon, color } = statusConfig[status];
+  const iconColor =
+    status === 'completed'
+      ? COLOR_SUCCESS
+      : status === 'in_progress'
+        ? theme.accent
+        : theme.textSecondary;
+
+  const icon =
+    status === 'completed'
+      ? 'circle-check'
+      : status === 'in_progress'
+        ? 'circle-half-stroke'
+        : 'circle';
+
+  const cardTint =
+    status === 'completed'
+      ? COLOR_SUCCESS + '0D'
+      : status === 'in_progress'
+        ? theme.accent + '0D'
+        : undefined;
+
   const totalSets = day.exercises.reduce((acc, ex) => acc + ex.sets, 0);
 
   return (
-    <View style={[styles.dayCard, { backgroundColor: theme.backgroundElement, borderLeftColor: color }]}>
-      <View style={[styles.dayNumber, { backgroundColor: theme.backgroundSelected }]}>
-        <ThemedText type="smallBold" themeColor="textSecondary">
-          D{day.dayNumber}
-        </ThemedText>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [{ opacity: pressed && onPress ? 0.72 : 1 }]}>
+      <View
+        style={[
+          styles.card,
+          { backgroundColor: cardTint ?? theme.backgroundElement, borderLeftColor: statusColor },
+        ]}>
+        {/* Day number badge */}
+        <View style={[styles.badge, { backgroundColor: iconColor + '18' }]}>
+          <ThemedText style={[styles.badgeNumber, { color: iconColor }]}>
+            {day.dayNumber}
+          </ThemedText>
+        </View>
+
+        {/* Content */}
+        <View style={styles.content}>
+          <ThemedText style={[styles.name, { color: theme.text }]} numberOfLines={1}>
+            {day.name}
+          </ThemedText>
+          <ThemedText style={[styles.meta, { color: theme.textSecondary }]}>
+            {day.exercises.length} ejercicios · {totalSets} series
+          </ThemedText>
+        </View>
+
+        {/* Status icon */}
+        <FontAwesome6 name={icon as any} solid size={20} color={iconColor} />
       </View>
-      <View style={styles.dayInfo}>
-        <ThemedText type="subtitle">{day.name}</ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          {day.exercises.length} ejercicios · {totalSets} series
-        </ThemedText>
-      </View>
-      <View style={styles.statusBadge}>
-        <FontAwesome6 name={icon as any} solid size={14} color={color} />
-        <ThemedText type="small" style={{ color }}>
-          {label}
-        </ThemedText>
-      </View>
-    </View>
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  dayCard: {
+  card: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: Spacing.two,
-    borderLeftWidth: 3,
-    paddingVertical: Spacing.two,
-    paddingHorizontal: Spacing.two,
-    gap: Spacing.two,
+    borderRadius: 12,
+    borderLeftWidth: 4,
+    paddingVertical: 14,
+    paddingRight: 16,
+    paddingLeft: 10,
+    gap: Spacing.three,
   },
-  dayNumber: {
-    width: 34,
-    height: 34,
-    borderRadius: Spacing.one,
+  badge: {
+    width: 42,
+    height: 42,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
-  dayInfo: {
+  badgeNumber: {
+    fontSize: 20,
+    fontWeight: '700',
+    lineHeight: 22,
+  },
+  content: {
     flex: 1,
-    gap: 1,
+    gap: 2,
   },
-  statusBadge: {
-    alignItems: 'center',
-    gap: Spacing.half,
+  name: {
+    fontSize: 15,
+    fontWeight: '600',
+    lineHeight: 20,
+  },
+  meta: {
+    fontSize: 12,
+    fontWeight: '400',
+    lineHeight: 16,
   },
 });

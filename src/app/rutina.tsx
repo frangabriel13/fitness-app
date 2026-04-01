@@ -189,6 +189,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.one,
   },
   daysList: {
-    gap: Spacing.one,
+    gap: Spacing.two,
   },
 });
