@@ -1,12 +1,18 @@
 // --- Plantilla (lo que diseña el trainer) ---
 
+export type ProgramType = 'template' | 'assigned';
+
 export interface Program {
   id: string;
   name: string;
-  totalWeeks: number;       // Duración del macrociclo
-  clientId: string;
+  totalWeeks: number; // Duración del macrociclo
+  clientId: string | null; // null para templates
   trainerId: string;
+  type: ProgramType; // template = plantilla, assigned = asignado a cliente
+  originTemplateId: string | null; // ID del template del que fue clonado
   microcycle: Microcycle;
+  createdAt: string; // ISO datetime
+  updatedAt: string; // ISO datetime
 }
 
 export interface Microcycle {
