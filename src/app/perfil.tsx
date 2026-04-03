@@ -5,6 +5,7 @@ import { ThemedView } from '@/components/themed-view';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useCurrentUser } from '@/stores/auth-store';
+import { useScrollToTopOnFocus } from '@/hooks/use-scroll-to-top-on-focus';
 import { ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -12,10 +13,12 @@ export default function PerfilScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const user = useCurrentUser();
+  const scrollRef = useScrollToTopOnFocus();
 
   return (
     <ThemedView style={styles.screen}>
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={[
           styles.container,
           {
@@ -48,7 +51,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',

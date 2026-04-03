@@ -5,6 +5,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useCurrentUser } from '@/stores/auth-store';
 import { MOCK_USERS_MAP } from '@/data/mock-users';
 import type { ClientProfile } from '@/types';
+import { useScrollToTopOnFocus } from '@/hooks/use-scroll-to-top-on-focus';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -13,6 +14,7 @@ export default function ProgresoScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const user = useCurrentUser();
+  const scrollRef = useScrollToTopOnFocus();
 
   // Trainer: client selector
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
@@ -26,6 +28,7 @@ export default function ProgresoScreen() {
   return (
     <ThemedView style={styles.screen}>
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={[
           styles.container,
           {
