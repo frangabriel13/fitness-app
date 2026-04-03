@@ -20,6 +20,7 @@ export interface TrainerProfile extends UserBase {
   specialties: string[];
   clientIds: string[]; // IDs de ClientProfile vinculados
   invitationCode: string; // Código que comparte con clientes
+  activeProgramId: string | null; // Rutina personal del entrenador
 }
 
 /** Perfil de cliente */
