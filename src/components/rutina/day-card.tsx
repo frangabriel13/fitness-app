@@ -1,20 +1,47 @@
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
-import type { TrainingDay, WorkoutStatus } from '@/types';
+import type { WorkoutStatus } from '@/types';
 import { Spacing } from '@/constants/theme';
 import { FontAwesome6 } from '@expo/vector-icons';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 const COLOR_SUCCESS = '#4CAF50';
 
 export interface DayCardProps {
-  day: TrainingDay;
+  name: string;
+  dayNumber: number;
+  exerciseCount: number;
+  totalSets: number;
   status: WorkoutStatus;
   onPress?: () => void;
 }
 
-export function DayCard({ day, status, onPress }: DayCardProps) {
+export function DayCard({ name, dayNumber, exerciseCount, totalSets, status, onPress }: DayCardProps) {
   const theme = useTheme();
+  const pressed = useSharedValue(0);
+
+  const tap = Gesture.Tap()
+    .onBegin(() => {
+      pressed.set(withTiming(1, { duration: 100 }));
+    })
+    .onFinalize(() => {
+      pressed.set(withTiming(0, { duration: 150 }));
+    })
+    .onEnd(() => {
+      if (onPress) runOnJS(onPress)();
+    });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: onPress ? interpolate(pressed.get(), [0, 1], [1, 0.72]) : 1,
+  }));
 
   const statusColor =
     status === 'completed'
@@ -44,38 +71,35 @@ export function DayCard({ day, status, onPress }: DayCardProps) {
         ? theme.accent + '0D'
         : undefined;
 
-  const totalSets = day.exercises.reduce((acc, ex) => acc + ex.sets, 0);
-
   return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [{ opacity: pressed && onPress ? 0.72 : 1 }]}>
-      <View
+    <GestureDetector gesture={tap}>
+      <Animated.View
         style={[
           styles.card,
+          animatedStyle,
           { backgroundColor: cardTint ?? theme.backgroundElement, borderLeftColor: statusColor },
         ]}>
         {/* Day number badge */}
         <View style={[styles.badge, { backgroundColor: iconColor + '18' }]}>
           <ThemedText style={[styles.badgeNumber, { color: iconColor }]}>
-            {day.dayNumber}
+            {dayNumber}
           </ThemedText>
         </View>
 
         {/* Content */}
         <View style={styles.content}>
           <ThemedText style={[styles.name, { color: theme.text }]} numberOfLines={1}>
-            {day.name}
+            {name}
           </ThemedText>
           <ThemedText style={[styles.meta, { color: theme.textSecondary }]}>
-            {day.exercises.length} ejercicios · {totalSets} series
+            {exerciseCount} ejercicios · {totalSets} series
           </ThemedText>
         </View>
 
         {/* Status icon */}
         <FontAwesome6 name={icon as any} solid size={20} color={iconColor} />
-      </View>
-    </Pressable>
+      </Animated.View>
+    </GestureDetector>
   );
 }
 

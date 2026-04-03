@@ -3,8 +3,9 @@ import { DayCard } from '@/components/rutina/day-card';
 import { WeekChip, CHIP_WIDTH, CHIP_GAP } from '@/components/rutina/week-chip';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useInitializeWorkoutLogs } from '@/hooks/use-initialize-workout-logs';
 import { useWorkoutStore } from '@/stores/workout-store';
-import { generateAllWorkoutLogs, getWeekStatus, getCurrentWeek } from '@/utils/workout';
+import { getWeekStatus, getCurrentWeek } from '@/utils/workout';
 import type { Program } from '@/types';
 import { useEffect, useRef, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -13,14 +14,9 @@ export function ProgramView({ program }: { program: Program }) {
   const theme = useTheme();
   const weekScrollRef = useRef<ScrollView>(null);
 
-  const workoutLogs = useWorkoutStore((s) => s.workoutLogs);
-  const setWorkoutLogs = useWorkoutStore((s) => s.setWorkoutLogs);
+  useInitializeWorkoutLogs(program);
 
-  useEffect(() => {
-    if (Object.keys(workoutLogs).length === 0) {
-      setWorkoutLogs(generateAllWorkoutLogs(program));
-    }
-  }, [program, setWorkoutLogs]);
+  const workoutLogs = useWorkoutStore((s) => s.workoutLogs);
 
   const { totalWeeks, name, microcycle } = program;
   const days = microcycle.trainingDays;
@@ -102,7 +98,17 @@ export function ProgramView({ program }: { program: Program }) {
           {days.map((day) => {
             const logKey = `${day.id}_w${selectedWeek}`;
             const status = workoutLogs[logKey]?.status ?? 'not_started';
-            return <DayCard key={day.id} day={day} status={status} />;
+            const totalSets = day.exercises.reduce((acc, ex) => acc + ex.sets, 0);
+            return (
+              <DayCard
+                key={day.id}
+                name={day.name}
+                dayNumber={day.dayNumber}
+                exerciseCount={day.exercises.length}
+                totalSets={totalSets}
+                status={status}
+              />
+            );
           })}
         </View>
       </View>

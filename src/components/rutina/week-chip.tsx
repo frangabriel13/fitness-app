@@ -2,7 +2,15 @@ import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
 import type { WeekStatus } from '@/utils/workout';
 import { FontAwesome6 } from '@expo/vector-icons';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 export const CHIP_WIDTH = 60;
 export const CHIP_GAP = 6;
@@ -62,12 +70,28 @@ export interface WeekChipProps {
 
 export function WeekChip({ week, weekStatus, isSelected, isCurrent, onPress }: WeekChipProps) {
   const theme = useTheme();
+  const pressed = useSharedValue(0);
   const { bg, border, number: numberColor, label: labelColor, dot: dotColor } =
     getChipColors(weekStatus, isSelected, isCurrent, theme);
 
+  const tap = Gesture.Tap()
+    .onBegin(() => {
+      pressed.set(withTiming(1, { duration: 80 }));
+    })
+    .onFinalize(() => {
+      pressed.set(withTiming(0, { duration: 120 }));
+    })
+    .onEnd(() => {
+      runOnJS(onPress)();
+    });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(pressed.get(), [0, 1], [1, 0.65]),
+  }));
+
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [{ opacity: pressed ? 0.65 : 1 }]}>
-      <View style={[styles.chip, { backgroundColor: bg, borderColor: border }]}>
+    <GestureDetector gesture={tap}>
+      <Animated.View style={[styles.chip, animatedStyle, { backgroundColor: bg, borderColor: border }]}>
         {/* Status indicator row */}
         <View style={styles.indicatorZone}>
           {weekStatus === 'completed' && !isSelected && (
@@ -87,8 +111,8 @@ export function WeekChip({ week, weekStatus, isSelected, isCurrent, onPress }: W
         <ThemedText style={[styles.label, { color: labelColor }]}>
           {isCurrent && !isSelected ? 'HOY' : 'sem'}
         </ThemedText>
-      </View>
-    </Pressable>
+      </Animated.View>
+    </GestureDetector>
   );
 }
 
