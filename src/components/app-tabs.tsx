@@ -1,11 +1,13 @@
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Tabs, TabList, TabSlot, TabTrigger, TabTriggerSlotProps } from 'expo-router/ui';
+import * as Haptics from 'expo-haptics';
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, { interpolate, runOnJS, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
@@ -17,19 +19,42 @@ interface TabButtonProps extends TabTriggerSlotProps {
   label: string;
 }
 
-function TabButton({ icon, alwaysSolid, label, isFocused, ...props }: TabButtonProps) {
+function triggerHaptic() {
+  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+}
+
+const TabButton = React.memo(function TabButton({ icon, alwaysSolid, label, isFocused, onPress, ...props }: TabButtonProps) {
   const theme = useTheme();
   const color = isFocused ? theme.accent : theme.textSecondary;
+  const pressed = useSharedValue(0);
+
+  const tap = Gesture.Tap()
+    .onBegin(() => {
+      pressed.set(withTiming(1, { duration: 80 }));
+    })
+    .onFinalize(() => {
+      pressed.set(withTiming(0, { duration: 150 }));
+    })
+    .onEnd(() => {
+      runOnJS(triggerHaptic)();
+      if (onPress) runOnJS(onPress)();
+    });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(pressed.get(), [0, 1], [1, 0.7]),
+  }));
 
   return (
-    <Pressable {...props} style={styles.tabButton}>
-      <FontAwesome6 name={icon} solid={alwaysSolid ?? isFocused} size={22} color={color} />
-      <ThemedText type="small" themeColor={isFocused ? 'accent' : 'textSecondary'}>
-        {label}
-      </ThemedText>
-    </Pressable>
+    <GestureDetector gesture={tap}>
+      <Animated.View {...props} style={[styles.tabButton, animatedStyle]}>
+        <FontAwesome6 name={icon} solid={alwaysSolid ?? isFocused} size={22} color={color} />
+        <ThemedText type="small" style={{ color }}>
+          {label}
+        </ThemedText>
+      </Animated.View>
+    </GestureDetector>
   );
-}
+});
 
 function BottomTabBar({ children }: { children: React.ReactNode }) {
   const theme = useTheme();
@@ -45,7 +70,7 @@ function BottomTabBar({ children }: { children: React.ReactNode }) {
 export default function AppTabs() {
   return (
     <Tabs>
-      <TabSlot style={{ flex: 1 }} />
+      <TabSlot style={styles.tabSlot} />
       <TabList asChild>
         <BottomTabBar>
           <TabTrigger name="home" href="/" asChild>
@@ -67,6 +92,9 @@ export default function AppTabs() {
 }
 
 const styles = StyleSheet.create({
+  tabSlot: {
+    flex: 1,
+  },
   tabBar: {
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(128,128,128,0.2)',

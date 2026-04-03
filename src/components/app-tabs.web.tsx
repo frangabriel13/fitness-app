@@ -24,29 +24,33 @@ interface TabButtonProps extends TabTriggerSlotProps {
   label: string;
 }
 
-function TabButton({ icon, alwaysSolid, label, isFocused, ...props }: TabButtonProps) {
+function getPressedStyle({ pressed }: { pressed: boolean }) {
+  return pressed ? styles.pressed : undefined;
+}
+
+const TabButton = React.memo(function TabButton({ icon, alwaysSolid, label, isFocused, ...props }: TabButtonProps) {
   const theme = useTheme();
   const color = isFocused ? theme.accent : theme.textSecondary;
 
   return (
-    <Pressable {...props} style={({ pressed }) => pressed && styles.pressed}>
+    <Pressable {...props} style={getPressedStyle}>
       <ThemedView
         type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
         style={styles.tabButtonView}>
         <FontAwesome6 name={icon} solid={alwaysSolid ?? isFocused} size={14} color={color} />
-        <ThemedText type="small" themeColor={isFocused ? 'accent' : 'textSecondary'}>
+        <ThemedText type="small" style={{ color }}>
           {label}
         </ThemedText>
       </ThemedView>
     </Pressable>
   );
-}
+});
 
-function CustomTabList(props: TabListProps) {
+function CustomTabList({ children }: TabListProps) {
   return (
-    <View {...props} style={styles.tabListContainer}>
+    <View style={styles.tabListContainer}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        {props.children}
+        {children}
       </ThemedView>
     </View>
   );
@@ -55,7 +59,7 @@ function CustomTabList(props: TabListProps) {
 export default function AppTabs() {
   return (
     <Tabs>
-      <TabSlot style={{ height: '100%' }} />
+      <TabSlot style={styles.tabSlot} />
       <TabList asChild>
         <CustomTabList>
           <TabTrigger name="home" href="/" asChild>
@@ -77,8 +81,12 @@ export default function AppTabs() {
 }
 
 const styles = StyleSheet.create({
+  tabSlot: {
+    height: '100%',
+  },
   tabListContainer: {
     position: 'absolute',
+    bottom: 0,
     width: '100%',
     padding: Spacing.three,
     justifyContent: 'center',
