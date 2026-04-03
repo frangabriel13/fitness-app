@@ -7,14 +7,20 @@ import { mmkvStorage } from './storage';
 
 interface AuthState {
   currentUserId: string;
+  isLoggedIn: boolean;
   switchUser: (userId: string) => void;
+  login: (userId: string) => void;
+  logout: () => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       currentUserId: DEFAULT_USER_ID,
+      isLoggedIn: false,
       switchUser: (userId) => set({ currentUserId: userId }),
+      login: (userId) => set({ currentUserId: userId, isLoggedIn: true }),
+      logout: () => set({ isLoggedIn: false }),
     }),
     {
       name: 'auth-store',
