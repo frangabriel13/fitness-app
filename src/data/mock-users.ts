@@ -16,6 +16,7 @@ export const MOCK_TRAINER: TrainerProfile = {
   specialties: ['Hipertrofia', 'Fuerza', 'Recomposición corporal'],
   clientIds: ['user_client_001', 'user_client_002', 'user_client_003'],
   invitationCode: 'FIT2024',
+  activeProgramId: 'prog_003',
 };
 
 // --- Clientes ---

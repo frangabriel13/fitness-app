@@ -36,11 +36,11 @@ export const useProgramStore = create<ProgramState>()(
 
 // --- Selector hooks ---
 
-/** Programa activo del usuario actual (solo para clientes) */
+/** Programa activo del usuario actual (cliente o entrenador) */
 export function useActiveProgram(): Program | null {
   const user = useCurrentUser();
   const programs = useProgramStore((s) => s.programs);
-  if (user.role === 'client' && user.activeProgramId) {
+  if (user.activeProgramId) {
     return programs[user.activeProgramId] ?? null;
   }
   return null;
