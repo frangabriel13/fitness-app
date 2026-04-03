@@ -8,6 +8,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { useCurrentUser } from '@/stores/auth-store';
 import { useActiveProgram, useTrainerAssignedPrograms } from '@/stores/program-store';
 import { useWorkoutStore } from '@/stores/workout-store';
+import { useScrollToTopOnFocus } from '@/hooks/use-scroll-to-top-on-focus';
 import type { ClientProfile } from '@/types';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -17,6 +18,7 @@ export default function RutinaScreen() {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const user = useCurrentUser();
+  const scrollRef = useScrollToTopOnFocus();
 
   // Client view
   const activeProgram = useActiveProgram();
@@ -56,6 +58,7 @@ export default function RutinaScreen() {
             paddingBottom: BottomTabInset + Spacing.four,
           },
         ]}
+        ref={scrollRef}
         showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View style={styles.header}>
@@ -103,7 +106,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    paddingHorizontal: 12,
+    paddingHorizontal: 8,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
