@@ -1,7 +1,7 @@
-import { createMMKV } from 'react-native-mmkv';
+import { MMKV } from 'react-native-mmkv';
 import { createJSONStorage } from 'zustand/middleware';
 
-const mmkv = createMMKV();
+const mmkv = new MMKV();
 
 /**
  * Adaptador de MMKV para el middleware `persist` de Zustand.

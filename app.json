@@ -8,7 +8,8 @@
     "scheme": "fitnessapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.frangabriel.x13.fitnessapp"
     },
     "android": {
       "adaptiveIcon": {
