@@ -3,6 +3,7 @@ import { DayCard } from '@/components/rutina/day-card';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { TrainingDay, WorkoutLog } from '@/types';
+import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 type Props = {
@@ -13,6 +14,7 @@ type Props = {
 
 export function DaysList({ days, selectedWeek, workoutLogs }: Props) {
   const theme = useTheme();
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
@@ -45,6 +47,7 @@ export function DaysList({ days, selectedWeek, workoutLogs }: Props) {
               exerciseCount={day.exercises.length}
               totalSets={totalSets}
               status={status}
+              onPress={() => router.push(`/workout/${day.id}`)}
             />
           );
         })}
