@@ -20,20 +20,21 @@ export default function RutinaScreen() {
         contentContainerStyle={[
           styles.container,
           {
-            paddingTop: insets.top + Spacing.two,
+            paddingTop: insets.top + Spacing.four,
             paddingBottom: BottomTabInset + Spacing.four,
           },
         ]}
         ref={scrollRef}
         showsVerticalScrollIndicator={false}>
-        {/* Header */}
+        {/* Header — editorial, magazine-style */}
         <View style={styles.header}>
-          <View style={styles.titleRow}>
-            <ThemedText type="title" style={styles.titleText}>MI </ThemedText>
-            <ThemedText type="title" style={[styles.titleText, { color: theme.accent }]}>
-              RUTINA
-            </ThemedText>
-          </View>
+          <ThemedText style={styles.overline} themeColor="textSecondary">
+            MI
+          </ThemedText>
+          <ThemedText style={[styles.heroTitle, { color: theme.text }]}>
+            RUTINA
+          </ThemedText>
+          <View style={[styles.accentStripe, { backgroundColor: theme.accent }]} />
         </View>
 
         {/* Program content */}
@@ -41,8 +42,11 @@ export default function RutinaScreen() {
           <ProgramView key={activeProgram.id} program={activeProgram} />
         ) : (
           <View style={styles.emptyState}>
-            <ThemedText themeColor="textSecondary">
-              No tenés un programa activo
+            <ThemedText style={styles.emptyIcon} themeColor="textSecondary">
+              ○
+            </ThemedText>
+            <ThemedText style={styles.emptyText} themeColor="textSecondary">
+              Sin programa activo
             </ThemedText>
           </View>
         )}
@@ -56,26 +60,45 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    paddingHorizontal: Spacing.two,
+    paddingHorizontal: Spacing.four,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
   },
   header: {
-    marginBottom: Spacing.one,
+    marginBottom: Spacing.five,
   },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
+  overline: {
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 6,
+    textTransform: 'uppercase',
+    marginBottom: 2,
   },
-  titleText: {
-    fontSize: 36,
-    lineHeight: 38,
+  heroTitle: {
+    fontSize: 44,
+    fontWeight: '900',
+    letterSpacing: -1,
+    lineHeight: 46,
+  },
+  accentStripe: {
+    width: 36,
+    height: 3,
+    borderRadius: 2,
+    marginTop: 12,
   },
   emptyState: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: Spacing.six,
+    gap: Spacing.two,
+  },
+  emptyIcon: {
+    fontSize: 48,
+    opacity: 0.3,
+  },
+  emptyText: {
+    fontSize: 15,
+    fontWeight: '500',
   },
 });

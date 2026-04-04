@@ -29,13 +29,15 @@ export function ProgramView({ program }: { program: Program }) {
     <View style={styles.container}>
       <ProgramHeader program={program} completedWeeks={completedWeeks} />
 
-      <WeekSelector
-        weeks={weeks}
-        weekStatusMap={weekStatusMap}
-        currentWeek={currentWeek}
-        selectedWeek={selectedWeek}
-        onSelectWeek={setSelectedWeek}
-      />
+      <View style={styles.weekSection}>
+        <WeekSelector
+          weeks={weeks}
+          weekStatusMap={weekStatusMap}
+          currentWeek={currentWeek}
+          selectedWeek={selectedWeek}
+          onSelectWeek={setSelectedWeek}
+        />
+      </View>
 
       <DaysList
         days={days}
@@ -48,6 +50,9 @@ export function ProgramView({ program }: { program: Program }) {
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.three,
+    gap: Spacing.five,
+  },
+  weekSection: {
+    marginTop: Spacing.one,
   },
 });

@@ -1,6 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { WeekChip, CHIP_WIDTH, CHIP_GAP } from '@/components/rutina/week-chip';
 import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
 import type { WeekStatus } from '@/utils/workout';
 import { useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -20,6 +21,7 @@ export function WeekSelector({
   selectedWeek,
   onSelectWeek,
 }: Props) {
+  const theme = useTheme();
   const scrollRef = useRef<ScrollView>(null);
 
   useEffect(() => {
@@ -29,9 +31,12 @@ export function WeekSelector({
 
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.sectionLabel} themeColor="textSecondary">
-        SEMANAS
-      </ThemedText>
+      <View style={styles.labelRow}>
+        <ThemedText style={styles.sectionLabel} themeColor="textSecondary">
+          SEMANAS
+        </ThemedText>
+        <View style={[styles.labelLine, { backgroundColor: theme.backgroundSelected }]} />
+      </View>
 
       <ScrollView
         ref={scrollRef}
@@ -55,18 +60,27 @@ export function WeekSelector({
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.two,
+    gap: 14,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   sectionLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 1.2,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2.5,
     textTransform: 'uppercase',
-    paddingHorizontal: Spacing.one,
+  },
+  labelLine: {
+    flex: 1,
+    height: 1,
+    opacity: 0.5,
   },
   chipStrip: {
     flexDirection: 'row',
     gap: CHIP_GAP,
-    paddingHorizontal: Spacing.one,
+    paddingHorizontal: Spacing.half,
   },
 });

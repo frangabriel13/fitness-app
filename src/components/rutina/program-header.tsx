@@ -12,44 +12,87 @@ type Props = {
 export function ProgramHeader({ program, completedWeeks }: Props) {
   const theme = useTheme();
   const { name, totalWeeks, microcycle } = program;
+  const progress = totalWeeks > 0 ? completedWeeks / totalWeeks : 0;
 
   return (
-    <View
-      style={[
-        styles.card,
-        { backgroundColor: theme.backgroundElement, borderLeftColor: theme.accent },
-      ]}>
-      <ThemedText style={styles.label} themeColor="textSecondary">
-        PROGRAMA
-      </ThemedText>
+    <View style={styles.container}>
+      {/* Top accent strip */}
+      <View style={[styles.topStrip, { backgroundColor: theme.accent }]} />
 
-      <View style={styles.mainRow}>
-        <ThemedText style={[styles.name, { color: theme.text }]} numberOfLines={2}>
-          {name}
+      <View style={[styles.card, { backgroundColor: theme.backgroundElement }]}>
+        {/* Label */}
+        <ThemedText style={styles.label} themeColor="textSecondary">
+          PROGRAMA ACTIVO
         </ThemedText>
-        <View style={styles.counter}>
-          <ThemedText style={[styles.counterNumber, { color: theme.accent }]}>
-            {completedWeeks}
-          </ThemedText>
-          <ThemedText style={[styles.counterFraction, { color: theme.textSecondary }]}>
-            / {totalWeeks}
-          </ThemedText>
-          <ThemedText style={[styles.counterLabel, { color: theme.textSecondary }]}>
-            semanas
-          </ThemedText>
-        </View>
-      </View>
 
-      <View style={styles.pills}>
-        <View style={[styles.pill, { backgroundColor: theme.backgroundSelected }]}>
-          <ThemedText style={[styles.pillText, { color: theme.textSecondary }]}>
-            {totalWeeks} sem
-          </ThemedText>
+        {/* Program name + progress fraction */}
+        <View style={styles.heroRow}>
+          <View style={styles.nameBlock}>
+            <ThemedText style={[styles.name, { color: theme.text }]} numberOfLines={2}>
+              {name}
+            </ThemedText>
+          </View>
+
+          <View style={styles.fractionBlock}>
+            <View style={styles.fractionRow}>
+              <ThemedText style={[styles.fractionBig, { color: theme.accent }]}>
+                {completedWeeks}
+              </ThemedText>
+              <ThemedText style={[styles.fractionSlash, { color: theme.textSecondary }]}>
+                /
+              </ThemedText>
+              <ThemedText style={[styles.fractionTotal, { color: theme.textSecondary }]}>
+                {totalWeeks}
+              </ThemedText>
+            </View>
+            <ThemedText style={[styles.fractionLabel, { color: theme.textSecondary }]}>
+              SEMANAS
+            </ThemedText>
+          </View>
         </View>
-        <View style={[styles.pill, { backgroundColor: theme.backgroundSelected }]}>
-          <ThemedText style={[styles.pillText, { color: theme.textSecondary }]}>
-            {microcycle.daysPerWeek} días / sem
-          </ThemedText>
+
+        {/* Progress bar */}
+        <View style={styles.progressTrack}>
+          <View
+            style={[
+              styles.progressFill,
+              {
+                backgroundColor: theme.accent,
+                width: `${Math.max(progress * 100, 2)}%` as any,
+              },
+            ]}
+          />
+          {/* Glow dot at the end of progress */}
+          {progress > 0 && progress < 1 && (
+            <View
+              style={[
+                styles.progressDot,
+                {
+                  backgroundColor: theme.accent,
+                  left: `${progress * 100}%` as any,
+                },
+              ]}
+            />
+          )}
+        </View>
+
+        {/* Meta pills */}
+        <View style={styles.metaRow}>
+          <View style={[styles.metaPill, { borderColor: theme.backgroundSelected }]}>
+            <ThemedText style={[styles.metaText, { color: theme.textSecondary }]}>
+              {microcycle.daysPerWeek} días / sem
+            </ThemedText>
+          </View>
+          <View style={[styles.metaPill, { borderColor: theme.backgroundSelected }]}>
+            <ThemedText style={[styles.metaText, { color: theme.textSecondary }]}>
+              {totalWeeks} semanas
+            </ThemedText>
+          </View>
+          <View style={[styles.metaPill, { borderColor: theme.backgroundSelected }]}>
+            <ThemedText style={[styles.metaText, { color: theme.textSecondary }]}>
+              {Math.round(progress * 100)}%
+            </ThemedText>
+          </View>
         </View>
       </View>
     </View>
@@ -57,60 +100,109 @@ export function ProgramHeader({ program, completedWeeks }: Props) {
 }
 
 const styles = StyleSheet.create({
+  container: {
+    gap: 0,
+  },
+  topStrip: {
+    height: 3,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    marginHorizontal: 1,
+  },
   card: {
-    borderRadius: 16,
-    borderLeftWidth: 3,
-    padding: Spacing.three,
-    gap: Spacing.two,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.four,
+    paddingHorizontal: Spacing.four,
+    gap: Spacing.three,
   },
   label: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 1.2,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2,
     textTransform: 'uppercase',
   },
-  mainRow: {
+  heroRow: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: Spacing.two,
+    justifyContent: 'space-between',
+    gap: Spacing.three,
+  },
+  nameBlock: {
+    flex: 1,
+    paddingTop: 2,
   },
   name: {
-    flex: 1,
     fontSize: 22,
-    fontWeight: '700',
-    lineHeight: 28,
-  },
-  counter: {
-    alignItems: 'flex-end',
-    gap: 1,
-  },
-  counterNumber: {
-    fontSize: 38,
     fontWeight: '800',
-    lineHeight: 40,
+    lineHeight: 26,
+    letterSpacing: -0.3,
   },
-  counterFraction: {
-    fontSize: 13,
+  fractionBlock: {
+    alignItems: 'flex-end',
+  },
+  fractionRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  fractionBig: {
+    fontSize: 42,
+    fontWeight: '900',
+    lineHeight: 42,
+    letterSpacing: -2,
+  },
+  fractionSlash: {
+    fontSize: 20,
+    fontWeight: '300',
+    marginHorizontal: 3,
+    opacity: 0.5,
+  },
+  fractionTotal: {
+    fontSize: 20,
     fontWeight: '600',
-    lineHeight: 16,
+    lineHeight: 24,
   },
-  counterLabel: {
-    fontSize: 11,
-    fontWeight: '500',
-    lineHeight: 14,
+  fractionLabel: {
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 2.5,
+    textTransform: 'uppercase',
+    marginTop: 2,
   },
-  pills: {
+  progressTrack: {
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    overflow: 'visible',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  progressDot: {
+    position: 'absolute',
+    top: -3,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    marginLeft: -5,
+    opacity: 0.6,
+  },
+  metaRow: {
     flexDirection: 'row',
     gap: Spacing.two,
+    marginTop: Spacing.one,
   },
-  pill: {
+  metaPill: {
+    borderWidth: 1,
     borderRadius: 20,
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
   },
-  pillText: {
-    fontSize: 12,
-    fontWeight: '500',
-    lineHeight: 16,
+  metaText: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
 });

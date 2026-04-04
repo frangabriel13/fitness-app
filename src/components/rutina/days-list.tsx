@@ -18,22 +18,26 @@ export function DaysList({ days, selectedWeek, workoutLogs }: Props) {
 
   return (
     <View style={styles.container}>
+      {/* Section header */}
       <View style={styles.header}>
-        <View style={styles.headerLabel}>
+        <View style={styles.headerLeft}>
           <ThemedText style={styles.sectionLabel} themeColor="textSecondary">
             SEMANA
           </ThemedText>
           <ThemedText style={[styles.weekNumber, { color: theme.accent }]}>
-            {selectedWeek}
+            {String(selectedWeek).padStart(2, '0')}
           </ThemedText>
         </View>
-        <View style={[styles.countBadge, { backgroundColor: theme.backgroundSelected }]}>
-          <ThemedText style={[styles.countText, { color: theme.textSecondary }]}>
-            {days.length} días
-          </ThemedText>
-        </View>
+
+        <ThemedText style={[styles.dayCount, { color: theme.textSecondary }]}>
+          {days.length} {days.length === 1 ? 'DÍA' : 'DÍAS'}
+        </ThemedText>
       </View>
 
+      {/* Thin separator */}
+      <View style={[styles.separator, { backgroundColor: theme.backgroundSelected }]} />
+
+      {/* Day cards */}
       <View style={styles.list}>
         {days.map((day) => {
           const logKey = `${day.id}_w${selectedWeek}`;
@@ -58,41 +62,40 @@ export function DaysList({ days, selectedWeek, workoutLogs }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    gap: Spacing.two,
+    gap: Spacing.three,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.one,
+    alignItems: 'baseline',
   },
-  headerLabel: {
+  headerLeft: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    gap: Spacing.one,
+    gap: 8,
   },
   sectionLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 1.2,
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2.5,
     textTransform: 'uppercase',
   },
   weekNumber: {
-    fontSize: 22,
-    fontWeight: '800',
-    lineHeight: 26,
+    fontSize: 28,
+    fontWeight: '900',
+    lineHeight: 30,
+    letterSpacing: -1,
   },
-  countBadge: {
-    borderRadius: 20,
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
+  dayCount: {
+    fontSize: 10,
+    fontWeight: '700',
+    letterSpacing: 2,
   },
-  countText: {
-    fontSize: 12,
-    fontWeight: '500',
-    lineHeight: 16,
+  separator: {
+    height: 1,
+    opacity: 0.4,
   },
   list: {
-    gap: Spacing.two,
+    gap: 12,
   },
 });
