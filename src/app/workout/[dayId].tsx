@@ -1,65 +1,149 @@
+import { useMemo } from 'react';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import Animated, {
+  interpolate,
+  runOnJS,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import { FontAwesome6 } from '@expo/vector-icons';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
+import { ExerciseCard } from '@/components/workout/exercise-card';
+import { MuscleGroupHeader } from '@/components/workout/muscle-group-header';
 import { useTheme } from '@/hooks/use-theme';
-import { MaxContentWidth, Spacing } from '@/constants/theme';
+import { interFont, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useActiveProgram } from '@/stores/program-store';
 import type { Exercise } from '@/types';
 
-function formatRest(seconds: number): string {
-  const min = Math.floor(seconds / 60);
-  const sec = seconds % 60;
-  return `${min}:${sec.toString().padStart(2, '0')}`;
+// ─── Helpers ────────────────────────────────────────────────
+
+interface MuscleGroup {
+  muscle: string;
+  exercises: Exercise[];
 }
 
-function ExerciseRow({ exercise, theme }: { exercise: Exercise; theme: ReturnType<typeof useTheme> }) {
-  const totalSets = exercise.sets;
+function groupByMuscle(exercises: Exercise[]): MuscleGroup[] {
+  const map = new Map<string, Exercise[]>();
+  for (const ex of exercises) {
+    const key = ex.agonistMuscle;
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(ex);
+  }
+  return Array.from(map, ([muscle, exercises]) => ({ muscle, exercises }));
+}
+
+// ─── Animated Buttons ───────────────────────────────────────
+
+function BackButton({ theme, onPress }: { theme: ReturnType<typeof useTheme>; onPress: () => void }) {
+  const pressed = useSharedValue(0);
+
+  const tap = Gesture.Tap()
+    .onBegin(() => {
+      pressed.set(withTiming(1, { duration: 80 }));
+    })
+    .onFinalize(() => {
+      pressed.set(withTiming(0, { duration: 120 }));
+    })
+    .onEnd(() => {
+      runOnJS(onPress)();
+    });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(pressed.get(), [0, 1], [1, 0.92]) }],
+    opacity: interpolate(pressed.get(), [0, 1], [1, 0.7]),
+  }));
 
   return (
-    <View style={[styles.exerciseRow, { backgroundColor: theme.backgroundElement }]}>
-      {/* Order badge */}
-      <View style={[styles.orderBadge, { backgroundColor: theme.accent + '18' }]}>
-        <ThemedText style={[styles.orderText, { color: theme.accent }]}>
-          {exercise.order}
-        </ThemedText>
-      </View>
+    <GestureDetector gesture={tap}>
+      <Animated.View
+        style={[
+          styles.backBtn,
+          animatedStyle,
+          { backgroundColor: theme.backgroundElement + 'CC' },
+        ]}>
+        <FontAwesome6 name="arrow-left" size={15} color={theme.text} />
+      </Animated.View>
+    </GestureDetector>
+  );
+}
 
-      {/* Content */}
-      <View style={styles.exerciseContent}>
-        <ThemedText style={styles.exerciseName} numberOfLines={2}>
-          {exercise.exerciseName}
-        </ThemedText>
-        <ThemedText style={[styles.exerciseMuscle, { color: theme.textSecondary }]} numberOfLines={1}>
-          {exercise.agonistMuscle}
-        </ThemedText>
+function CtaButton({ theme, onPress }: { theme: ReturnType<typeof useTheme>; onPress: () => void }) {
+  const pressed = useSharedValue(0);
 
-        {/* Prescription */}
-        <View style={styles.prescriptionRow}>
-          <View style={[styles.pill, { backgroundColor: theme.backgroundSelected }]}>
-            <ThemedText style={[styles.pillText, { color: theme.textSecondary }]}>
-              {totalSets}&times;{exercise.repRange}
-            </ThemedText>
-          </View>
-          <View style={[styles.pill, { backgroundColor: theme.backgroundSelected }]}>
-            <ThemedText style={[styles.pillText, { color: theme.textSecondary }]}>
-              RIR {exercise.targetRir}
-            </ThemedText>
-          </View>
-          <View style={[styles.pill, { backgroundColor: theme.backgroundSelected }]}>
-            <FontAwesome6 name="clock" size={9} color={theme.textSecondary} />
-            <ThemedText style={[styles.pillText, { color: theme.textSecondary }]}>
-              {formatRest(exercise.restSeconds)}
-            </ThemedText>
-          </View>
-        </View>
-      </View>
+  const tap = Gesture.Tap()
+    .onBegin(() => {
+      pressed.set(withTiming(1, { duration: 100 }));
+    })
+    .onFinalize(() => {
+      pressed.set(withTiming(0, { duration: 180 }));
+    })
+    .onEnd(() => {
+      runOnJS(onPress)();
+    });
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(pressed.get(), [0, 1], [1, 0.97]) }],
+    opacity: interpolate(pressed.get(), [0, 1], [1, 0.85]),
+  }));
+
+  const glowShadow = Platform.select({
+    ios: {
+      shadowColor: theme.accent,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.35,
+      shadowRadius: 10,
+    },
+    default: { elevation: 8 },
+  });
+
+  return (
+    <GestureDetector gesture={tap}>
+      <Animated.View
+        style={[
+          styles.ctaButton,
+          animatedStyle,
+          glowShadow,
+          { backgroundColor: theme.accent },
+        ]}>
+        <FontAwesome6 name="play" size={14} color={theme.background} />
+        <ThemedText style={[styles.ctaText, { color: theme.background }]}>
+          COMENZAR ENTRENAMIENTO
+        </ThemedText>
+      </Animated.View>
+    </GestureDetector>
+  );
+}
+
+// ─── Stat Block ─────────────────────────────────────────────
+
+function StatBlock({
+  value,
+  label,
+  theme,
+}: {
+  value: string | number;
+  label: string;
+  theme: ReturnType<typeof useTheme>;
+}) {
+  return (
+    <View style={styles.statBlock}>
+      <ThemedText style={[styles.statValue, { color: theme.text }]}>
+        {value}
+      </ThemedText>
+      <ThemedText style={[styles.statLabel, { color: theme.textSecondary }]}>
+        {label}
+      </ThemedText>
     </View>
   );
 }
+
+// ─── Screen ─────────────────────────────────────────────────
 
 export default function WorkoutDetailScreen() {
   const { dayId, week } = useLocalSearchParams<{ dayId: string; week: string }>();
@@ -71,20 +155,22 @@ export default function WorkoutDetailScreen() {
   const weekNumber = Number(week) || 1;
   const trainingDay = program?.microcycle.trainingDays.find((d) => d.id === dayId);
 
+  const muscleGroups = useMemo(
+    () => (trainingDay ? groupByMuscle(trainingDay.exercises) : []),
+    [trainingDay],
+  );
+
   if (!trainingDay) {
     return (
       <ThemedView style={styles.screen}>
-        <View style={[styles.headerBar, { paddingTop: insets.top + Spacing.two }]}>
-          <Pressable
-            onPress={() => router.back()}
-            hitSlop={16}
-            style={[styles.closeBtn, { backgroundColor: theme.backgroundElement }]}>
-            <FontAwesome6 name="xmark" size={16} color={theme.text} />
-          </Pressable>
+        <View style={[styles.emptyNav, { paddingTop: insets.top + Spacing.two }]}>
+          <BackButton theme={theme} onPress={() => router.back()} />
         </View>
         <View style={styles.emptyState}>
           <FontAwesome6 name="dumbbell" size={40} color={theme.textSecondary + '44'} />
-          <ThemedText themeColor="textSecondary" style={{ marginTop: Spacing.three }}>
+          <ThemedText
+            themeColor="textSecondary"
+            style={[styles.emptyText, { marginTop: Spacing.three }]}>
             No se encontró el entrenamiento
           </ThemedText>
         </View>
@@ -97,72 +183,77 @@ export default function WorkoutDetailScreen() {
 
   return (
     <ThemedView style={styles.screen}>
-      {/* Header */}
-      <View
-        style={[
-          styles.headerBar,
-          {
-            paddingTop: insets.top + Spacing.two,
-            borderBottomColor: theme.backgroundElement,
-          },
-        ]}>
-        <Pressable
-          onPress={() => router.back()}
-          hitSlop={16}
-          style={[styles.closeBtn, { backgroundColor: theme.backgroundElement }]}>
-          <FontAwesome6 name="xmark" size={16} color={theme.text} />
-        </Pressable>
-
-        <View style={styles.headerCenter}>
-          <ThemedText style={styles.headerTitle} numberOfLines={1}>
-            {trainingDay.name}
-          </ThemedText>
-          <ThemedText style={[styles.headerSubtitle, { color: theme.textSecondary }]}>
-            Día {trainingDay.dayNumber}
-          </ThemedText>
+      {/* ── Hero Header ── */}
+      <View style={[styles.hero, { paddingTop: insets.top + Spacing.two }]}>
+        {/* Top row: back + week badge */}
+        <View style={styles.heroTopRow}>
+          <BackButton theme={theme} onPress={() => router.back()} />
+          <View style={[styles.weekBadge, { backgroundColor: theme.accent + '18' }]}>
+            <ThemedText style={[styles.weekBadgeText, { color: theme.accent }]}>
+              SEM {weekNumber}
+            </ThemedText>
+          </View>
         </View>
 
-        <View style={[styles.weekBadge, { backgroundColor: theme.accent + '18' }]}>
-          <ThemedText style={[styles.weekBadgeText, { color: theme.accent }]}>
-            SEM {weekNumber}
+        {/* Editorial content */}
+        <View style={styles.heroContent}>
+          <ThemedText style={[styles.overline, { color: theme.textSecondary }]}>
+            ENTRENAMIENTO
           </ThemedText>
+
+          <View style={styles.heroTitleRow}>
+            <ThemedText style={[styles.dayNumber, { color: theme.accent }]}>
+              {String(trainingDay.dayNumber).padStart(2, '0')}
+            </ThemedText>
+            <ThemedText style={[styles.dayName, { color: theme.text }]} numberOfLines={2}>
+              {trainingDay.name}
+            </ThemedText>
+          </View>
+
+          <View style={[styles.accentStripe, { backgroundColor: theme.accent }]} />
         </View>
+
+        {/* Bottom separator */}
+        <View style={[styles.heroSeparator, { backgroundColor: theme.backgroundSelected }]} />
       </View>
 
-      {/* Content */}
+      {/* ── Scrollable Content ── */}
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + 100 }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { paddingBottom: insets.bottom + 120 },
+        ]}
         showsVerticalScrollIndicator={false}>
-        {/* Summary */}
-        <View style={styles.summaryRow}>
-          <View style={[styles.summaryChip, { backgroundColor: theme.backgroundElement }]}>
-            <FontAwesome6 name="dumbbell" size={12} color={theme.accent} />
-            <ThemedText style={[styles.summaryText, { color: theme.text }]}>
-              {totalExercises} ejercicios
-            </ThemedText>
-          </View>
-          <View style={[styles.summaryChip, { backgroundColor: theme.backgroundElement }]}>
-            <FontAwesome6 name="layer-group" size={12} color={theme.accent} />
-            <ThemedText style={[styles.summaryText, { color: theme.text }]}>
-              {totalSets} series
-            </ThemedText>
-          </View>
+        {/* Stats Ribbon */}
+        <View style={styles.statsRibbon}>
+          <StatBlock value={totalExercises} label="EJERCICIOS" theme={theme} />
+          <View style={[styles.statDivider, { backgroundColor: theme.backgroundSelected }]} />
+          <StatBlock value={totalSets} label="SERIES" theme={theme} />
+          <View style={[styles.statDivider, { backgroundColor: theme.backgroundSelected }]} />
+          <StatBlock value={muscleGroups.length} label="MÚSCULOS" theme={theme} />
         </View>
 
-        {/* Section label */}
-        <ThemedText style={[styles.sectionLabel, { color: theme.textSecondary }]}>
-          EJERCICIOS
-        </ThemedText>
-
-        {/* Exercise list */}
-        <View style={styles.exerciseList}>
-          {trainingDay.exercises.map((exercise) => (
-            <ExerciseRow key={exercise.id} exercise={exercise} theme={theme} />
+        {/* Exercise groups */}
+        <View style={styles.groupsContainer}>
+          {muscleGroups.map((group, groupIndex) => (
+            <View key={group.muscle} style={styles.muscleGroup}>
+              <MuscleGroupHeader
+                muscleName={group.muscle}
+                exerciseCount={group.exercises.length}
+                groupIndex={groupIndex}
+                theme={theme}
+              />
+              <View style={styles.exerciseList}>
+                {group.exercises.map((exercise) => (
+                  <ExerciseCard key={exercise.id} exercise={exercise} theme={theme} />
+                ))}
+              </View>
+            </View>
           ))}
         </View>
       </ScrollView>
 
-      {/* Bottom CTA */}
+      {/* ── Bottom CTA ── */}
       <View
         style={[
           styles.bottomBar,
@@ -172,154 +263,139 @@ export default function WorkoutDetailScreen() {
             borderTopColor: theme.backgroundElement,
           },
         ]}>
-        <Pressable
+        <CtaButton
+          theme={theme}
           onPress={() => {
             // TODO: navigate to active workout session
           }}
-          style={({ pressed }) => [
-            styles.ctaButton,
-            { backgroundColor: theme.accent, opacity: pressed ? 0.85 : 1 },
-          ]}>
-          <FontAwesome6 name="play" size={14} color={theme.background} />
-          <ThemedText style={[styles.ctaText, { color: theme.background }]}>
-            COMENZAR ENTRENAMIENTO
-          </ThemedText>
-        </Pressable>
+        />
       </View>
     </ThemedView>
   );
 }
 
+// ─── Styles ─────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
-  headerBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.three,
-    paddingBottom: Spacing.three,
-    borderBottomWidth: 1,
-    gap: Spacing.three,
+
+  // ── Hero ──
+  hero: {
+    paddingHorizontal: Spacing.four,
   },
-  closeBtn: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
+  heroTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  backBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  headerCenter: {
-    flex: 1,
-  },
-  headerTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    lineHeight: 22,
-  },
-  headerSubtitle: {
-    fontSize: 12,
-    fontWeight: '500',
   },
   weekBadge: {
     borderRadius: 20,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 5,
   },
   weekBadgeText: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.5,
+    fontFamily: interFont('700'),
+    fontSize: 9,
+    letterSpacing: 2.5,
+    textTransform: 'uppercase',
   },
-  emptyState: {
+  heroContent: {
+    paddingTop: Spacing.four,
+    paddingBottom: Spacing.four,
+  },
+  overline: {
+    fontFamily: interFont('700'),
+    fontSize: 10,
+    letterSpacing: 2.5,
+    textTransform: 'uppercase',
+    marginBottom: Spacing.two,
+  },
+  heroTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 12,
+  },
+  dayNumber: {
+    fontFamily: interFont('900'),
+    fontSize: 44,
+    lineHeight: 44,
+    letterSpacing: -2,
+  },
+  dayName: {
+    fontFamily: interFont('800'),
+    fontSize: 24,
+    lineHeight: 28,
+    letterSpacing: -0.5,
+    flex: 1,
+  },
+  accentStripe: {
+    height: 3,
+    width: 40,
+    borderRadius: 2,
+    marginTop: Spacing.two,
+  },
+  heroSeparator: {
+    height: 1,
+    opacity: 0.4,
+  },
+
+  // ── Stats Ribbon ──
+  statsRibbon: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: Spacing.four,
+    paddingHorizontal: Spacing.three,
+  },
+  statBlock: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    gap: 2,
   },
+  statValue: {
+    fontFamily: interFont('900'),
+    fontSize: 28,
+    lineHeight: 30,
+    letterSpacing: -1,
+  },
+  statLabel: {
+    fontFamily: interFont('700'),
+    fontSize: 8,
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+  },
+  statDivider: {
+    width: 1,
+    height: 28,
+    opacity: 0.4,
+  },
+
+  // ── Exercise Groups ──
   scrollContent: {
     paddingHorizontal: Spacing.two,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
   },
-  summaryRow: {
-    flexDirection: 'row',
-    gap: Spacing.two,
-    paddingVertical: Spacing.three,
-    paddingHorizontal: Spacing.one,
+  groupsContainer: {
+    gap: Spacing.five,
   },
-  summaryChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-    borderRadius: 12,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-  },
-  summaryText: {
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  sectionLabel: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 1.2,
-    textTransform: 'uppercase',
-    paddingHorizontal: Spacing.one,
-    marginBottom: Spacing.two,
+  muscleGroup: {
+    gap: Spacing.three,
   },
   exerciseList: {
     gap: Spacing.two,
   },
-  exerciseRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    borderRadius: 14,
-    padding: Spacing.three,
-    gap: Spacing.three,
-  },
-  orderBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  orderText: {
-    fontSize: 18,
-    fontWeight: '800',
-  },
-  exerciseContent: {
-    flex: 1,
-    gap: Spacing.one,
-  },
-  exerciseName: {
-    fontSize: 15,
-    fontWeight: '700',
-    lineHeight: 20,
-  },
-  exerciseMuscle: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  prescriptionRow: {
-    flexDirection: 'row',
-    gap: 6,
-    flexWrap: 'wrap',
-    marginTop: Spacing.one,
-  },
-  pill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    borderRadius: 20,
-    paddingHorizontal: Spacing.two,
-    paddingVertical: 3,
-  },
-  pillText: {
-    fontSize: 11,
-    fontWeight: '600',
-  },
+
+  // ── Bottom CTA ──
   bottomBar: {
     position: 'absolute',
     bottom: 0,
@@ -333,13 +409,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 52,
+    height: 54,
     borderRadius: 14,
     gap: Spacing.two,
   },
   ctaText: {
+    fontFamily: interFont('700'),
+    fontSize: 14,
+    letterSpacing: 1,
+  },
+
+  // ── Empty State ──
+  emptyNav: {
+    paddingHorizontal: Spacing.four,
+  },
+  emptyState: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyText: {
+    fontFamily: interFont('500'),
     fontSize: 15,
-    fontWeight: '700',
-    letterSpacing: 0.5,
   },
 });
