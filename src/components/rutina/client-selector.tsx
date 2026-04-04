@@ -1,5 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { interFont, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { ClientProfile } from '@/types';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   chipText: {
+    fontFamily: interFont('600'),
     fontSize: 14,
-    fontWeight: '600',
   },
 });

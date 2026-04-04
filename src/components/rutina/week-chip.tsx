@@ -2,6 +2,7 @@ import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
 import type { WeekStatus } from '@/utils/workout';
 import { FontAwesome6 } from '@expo/vector-icons';
+import { interFont } from '@/constants/theme';
 import { Platform, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
@@ -164,14 +165,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   number: {
+    fontFamily: interFont('800'),
     fontSize: 24,
-    fontWeight: '800',
     lineHeight: 28,
     letterSpacing: -0.5,
   },
   label: {
+    fontFamily: interFont('700'),
     fontSize: 8,
-    fontWeight: '700',
     letterSpacing: 1.5,
     textTransform: 'uppercase',
   },

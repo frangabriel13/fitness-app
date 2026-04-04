@@ -1,7 +1,7 @@
 import { ThemedText } from '@/components/themed-text';
 import { useTheme } from '@/hooks/use-theme';
 import type { WorkoutStatus } from '@/types';
-import { Spacing } from '@/constants/theme';
+import { interFont, Spacing } from '@/constants/theme';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { Platform, StyleSheet, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -181,14 +181,14 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   dayLabel: {
+    fontFamily: interFont('700'),
     fontSize: 8,
-    fontWeight: '700',
     letterSpacing: 1.5,
     lineHeight: 10,
   },
   dayNumber: {
+    fontFamily: interFont('900'),
     fontSize: 24,
-    fontWeight: '900',
     lineHeight: 26,
     letterSpacing: -0.5,
   },
@@ -197,8 +197,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   name: {
+    fontFamily: interFont('700'),
     fontSize: 16,
-    fontWeight: '700',
     lineHeight: 20,
     letterSpacing: -0.2,
   },
@@ -208,8 +208,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   meta: {
+    fontFamily: interFont('500'),
     fontSize: 12,
-    fontWeight: '500',
     lineHeight: 16,
   },
   metaDot: {

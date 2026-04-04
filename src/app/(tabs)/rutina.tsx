@@ -1,7 +1,7 @@
 import { ProgramView } from '@/components/rutina/program-view';
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { BottomTabInset, interFont, MaxContentWidth, Spacing } from '@/constants/theme';
 import { useScrollToTopOnFocus } from '@/hooks/use-scroll-to-top-on-focus';
 import { useTheme } from '@/hooks/use-theme';
 import { useActiveProgram } from '@/stores/program-store';
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.two,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
@@ -69,15 +69,15 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.five,
   },
   overline: {
+    fontFamily: interFont('600'),
     fontSize: 13,
-    fontWeight: '600',
     letterSpacing: 6,
     textTransform: 'uppercase',
     marginBottom: 2,
   },
   heroTitle: {
+    fontFamily: interFont('900'),
     fontSize: 44,
-    fontWeight: '900',
     letterSpacing: -1,
     lineHeight: 46,
   },
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     opacity: 0.3,
   },
   emptyText: {
+    fontFamily: interFont('500'),
     fontSize: 15,
-    fontWeight: '500',
   },
 });

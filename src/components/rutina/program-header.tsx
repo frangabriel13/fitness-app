@@ -1,5 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
-import { Spacing } from '@/constants/theme';
+import { interFont, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { Program } from '@/types';
 import { StyleSheet, View } from 'react-native';
@@ -118,8 +118,8 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   label: {
+    fontFamily: interFont('700'),
     fontSize: 10,
-    fontWeight: '700',
     letterSpacing: 2,
     textTransform: 'uppercase',
   },
@@ -134,8 +134,8 @@ const styles = StyleSheet.create({
     paddingTop: 2,
   },
   name: {
+    fontFamily: interFont('800'),
     fontSize: 22,
-    fontWeight: '800',
     lineHeight: 26,
     letterSpacing: -0.3,
   },
@@ -147,25 +147,25 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
   },
   fractionBig: {
+    fontFamily: interFont('900'),
     fontSize: 42,
-    fontWeight: '900',
     lineHeight: 42,
     letterSpacing: -2,
   },
   fractionSlash: {
+    fontFamily: interFont('400'),
     fontSize: 20,
-    fontWeight: '300',
     marginHorizontal: 3,
     opacity: 0.5,
   },
   fractionTotal: {
+    fontFamily: interFont('600'),
     fontSize: 20,
-    fontWeight: '600',
     lineHeight: 24,
   },
   fractionLabel: {
+    fontFamily: interFont('700'),
     fontSize: 9,
-    fontWeight: '700',
     letterSpacing: 2.5,
     textTransform: 'uppercase',
     marginTop: 2,
@@ -201,8 +201,8 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   metaText: {
+    fontFamily: interFont('600'),
     fontSize: 11,
-    fontWeight: '600',
     letterSpacing: 0.3,
   },
 });

@@ -32,41 +32,44 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
 
 const styles = StyleSheet.create({
   small: {
+    fontFamily: Fonts.body,
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: 500,
   },
   smallBold: {
+    fontFamily: Fonts.bodyBold,
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: 700,
   },
   default: {
+    fontFamily: Fonts.body,
     fontSize: 16,
     lineHeight: 24,
-    fontWeight: 500,
   },
   title: {
+    fontFamily: Fonts.display,
     fontSize: 48,
-    fontWeight: 600,
     lineHeight: 52,
+    letterSpacing: 1,
   },
   subtitle: {
+    fontFamily: Fonts.display,
     fontSize: 32,
-    lineHeight: 44,
-    fontWeight: 600,
+    lineHeight: 40,
+    letterSpacing: 0.5,
   },
   link: {
+    fontFamily: Fonts.body,
     lineHeight: 30,
     fontSize: 14,
   },
   linkPrimary: {
+    fontFamily: Fonts.body,
     lineHeight: 30,
     fontSize: 14,
   },
   code: {
     fontFamily: Fonts.mono,
-    fontWeight: Platform.select({ android: 700 }) ?? 500,
     fontSize: 12,
   },
 });

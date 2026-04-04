@@ -12,7 +12,9 @@
       "Bash(kill %1)",
       "Read(//dev/**)",
       "Bash(npx eslint:*)",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "Bash(ls /mnt/c/Users/mansi/Desktop/projects/fitness-app/node_modules/@expo-google-fonts/inter/*.ttf)",
+      "Bash(ls /mnt/c/Users/mansi/Desktop/projects/fitness-app/node_modules/@expo-google-fonts/bebas-neue/*.ttf)"
     ]
   }
 }

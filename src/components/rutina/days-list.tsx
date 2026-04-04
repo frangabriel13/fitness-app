@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { DayCard } from '@/components/rutina/day-card';
-import { Spacing } from '@/constants/theme';
+import { interFont, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { TrainingDay, WorkoutLog } from '@/types';
 import { useRouter } from 'expo-router';
@@ -75,20 +75,20 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sectionLabel: {
+    fontFamily: interFont('700'),
     fontSize: 10,
-    fontWeight: '700',
     letterSpacing: 2.5,
     textTransform: 'uppercase',
   },
   weekNumber: {
+    fontFamily: interFont('900'),
     fontSize: 28,
-    fontWeight: '900',
     lineHeight: 30,
     letterSpacing: -1,
   },
   dayCount: {
+    fontFamily: interFont('700'),
     fontSize: 10,
-    fontWeight: '700',
     letterSpacing: 2,
   },
   separator: {

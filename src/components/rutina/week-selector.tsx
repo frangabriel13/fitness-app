@@ -1,6 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { WeekChip, CHIP_WIDTH, CHIP_GAP } from '@/components/rutina/week-chip';
-import { Spacing } from '@/constants/theme';
+import { interFont, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import type { WeekStatus } from '@/utils/workout';
 import { useEffect, useRef } from 'react';
@@ -68,8 +68,8 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   sectionLabel: {
+    fontFamily: interFont('700'),
     fontSize: 10,
-    fontWeight: '700',
     letterSpacing: 2.5,
     textTransform: 'uppercase',
   },

@@ -40,18 +40,30 @@ export const Fonts = Platform.select({
     rounded: 'ui-rounded',
     /** iOS `UIFontDescriptorSystemDesignMonospaced` */
     mono: 'ui-monospace',
+    /** Bebas Neue — display/titles */
+    display: 'BebasNeue_400Regular',
+    /** Inter Regular — body text */
+    body: 'Inter_400Regular',
+    /** Inter Bold — bold body text */
+    bodyBold: 'Inter_700Bold',
   },
   default: {
     sans: 'normal',
     serif: 'serif',
     rounded: 'normal',
     mono: 'monospace',
+    display: 'BebasNeue_400Regular',
+    body: 'Inter_400Regular',
+    bodyBold: 'Inter_700Bold',
   },
   web: {
-    sans: 'var(--font-display)',
+    sans: 'var(--font-body)',
     serif: 'var(--font-serif)',
     rounded: 'var(--font-rounded)',
     mono: 'var(--font-mono)',
+    display: 'var(--font-display)',
+    body: 'var(--font-body)',
+    bodyBold: 'var(--font-body)',
   },
 });
 
@@ -64,6 +76,25 @@ export const Spacing = {
   five: 32,
   six: 64,
 } as const;
+
+const INTER_WEIGHT_MAP = {
+  '400': 'Inter_400Regular',
+  '500': 'Inter_500Medium',
+  '600': 'Inter_600SemiBold',
+  '700': 'Inter_700Bold',
+  '800': 'Inter_800ExtraBold',
+  '900': 'Inter_900Black',
+} as const;
+
+/**
+ * Returns the correct Inter fontFamily for a given weight.
+ * On native: maps to the specific embedded font file.
+ * On web: returns var(--font-body) — Inter Variable handles weight via CSS.
+ */
+export function interFont(weight: keyof typeof INTER_WEIGHT_MAP): string {
+  if (Platform.OS === 'web') return 'var(--font-body)';
+  return INTER_WEIGHT_MAP[weight];
+}
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
