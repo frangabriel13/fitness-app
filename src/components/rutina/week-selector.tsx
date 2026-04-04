@@ -1,7 +1,6 @@
 import { ThemedText } from '@/components/themed-text';
 import { WeekChip, CHIP_WIDTH, CHIP_GAP } from '@/components/rutina/week-chip';
 import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
 import type { WeekStatus } from '@/utils/workout';
 import { useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
@@ -11,8 +10,6 @@ type Props = {
   weekStatusMap: Record<number, WeekStatus>;
   currentWeek: number;
   selectedWeek: number;
-  totalWeeks: number;
-  completedCount: number;
   onSelectWeek: (week: number) => void;
 };
 
@@ -21,13 +18,9 @@ export function WeekSelector({
   weekStatusMap,
   currentWeek,
   selectedWeek,
-  totalWeeks,
-  completedCount,
   onSelectWeek,
 }: Props) {
-  const theme = useTheme();
   const scrollRef = useRef<ScrollView>(null);
-  const progressRatio = completedCount / totalWeeks;
 
   useEffect(() => {
     const x = Math.max(0, (currentWeek - 2) * (CHIP_WIDTH + CHIP_GAP));
@@ -36,26 +29,9 @@ export function WeekSelector({
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <ThemedText type="smallBold" themeColor="textSecondary">
-          SEMANAS
-        </ThemedText>
-        <View style={styles.progressLabel}>
-          <View style={[styles.progressDot, { backgroundColor: theme.accent }]} />
-          <ThemedText type="small" themeColor="textSecondary">
-            {completedCount} de {totalWeeks} completadas
-          </ThemedText>
-        </View>
-      </View>
-
-      <View style={[styles.progressTrack, { backgroundColor: theme.backgroundSelected }]}>
-        <View
-          style={[
-            styles.progressFill,
-            { backgroundColor: theme.accent, width: `${progressRatio * 100}%` },
-          ]}
-        />
-      </View>
+      <ThemedText style={styles.sectionLabel} themeColor="textSecondary">
+        SEMANAS
+      </ThemedText>
 
       <ScrollView
         ref={scrollRef}
@@ -81,31 +57,12 @@ const styles = StyleSheet.create({
   container: {
     gap: Spacing.two,
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
     paddingHorizontal: Spacing.one,
-  },
-  progressLabel: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.one,
-  },
-  progressDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
-  progressTrack: {
-    height: 3,
-    borderRadius: 2,
-    overflow: 'hidden',
-    marginHorizontal: Spacing.one,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 2,
   },
   chipStrip: {
     flexDirection: 'row',

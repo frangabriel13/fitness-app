@@ -1,121 +1,167 @@
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
+import { RoleColors, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { useWorkoutStore } from '@/stores/workout-store';
 import { useActiveProgram } from '@/stores/program-store';
 import type { ClientProfile, TrainerProfile } from '@/types';
 import { MOCK_USERS_MAP } from '@/data/mock-users';
-import { Spacing } from '@/constants/theme';
-import { StyleSheet, View } from 'react-native';
+import { getCurrentWeek } from '@/utils/workout';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import { Alert, Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { ProfileAvatar } from './profile-avatar';
+import { ProfileCard } from './profile-card';
+
+function formatBirthday(iso: string): string {
+  const date = new Date(iso + 'T00:00:00');
+  return new Intl.DateTimeFormat('es-AR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
 
 function InfoRow({ label, value }: { label: string; value: string }) {
-  const theme = useTheme();
   return (
     <View style={styles.infoRow}>
-      <ThemedText type="small" themeColor="textSecondary">
-        {label}
-      </ThemedText>
-      <ThemedText style={{ fontSize: 15 }}>{value}</ThemedText>
+      <ThemedText type="small" themeColor="textSecondary">{label}</ThemedText>
+      <ThemedText style={styles.infoValue}>{value}</ThemedText>
+    </View>
+  );
+}
+
+function MetricTile({ value, unit, label }: { value: string; unit: string; label: string }) {
+  const theme = useTheme();
+  return (
+    <View style={[styles.metricTile, { backgroundColor: theme.backgroundSelected }]}>
+      <View style={styles.metricValueRow}>
+        <ThemedText style={styles.metricValue}>{value}</ThemedText>
+        <ThemedText type="small" themeColor="textSecondary">{unit}</ThemedText>
+      </View>
+      <ThemedText type="small" themeColor="textSecondary">{label}</ThemedText>
+    </View>
+  );
+}
+
+function TrainerCard({ trainerId }: { trainerId: string | null }) {
+  const theme = useTheme();
+  const [code, setCode] = useState('');
+  const trainer = trainerId
+    ? (MOCK_USERS_MAP[trainerId] as TrainerProfile | undefined)
+    : null;
+
+  if (trainer) {
+    return (
+      <View style={styles.trainerRow}>
+        <ProfileAvatar displayName={trainer.displayName} photoUrl={trainer.photoUrl} size={44} />
+        <View style={styles.trainerInfo}>
+          <ThemedText style={styles.nameText}>{trainer.displayName}</ThemedText>
+          <ThemedText type="small" themeColor="textSecondary">
+            {trainer.specialties.join(' · ')}
+          </ThemedText>
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.noTrainerState}>
+      <ThemedText themeColor="textSecondary">Sin entrenador vinculado</ThemedText>
+      <View style={styles.linkRow}>
+        <TextInput
+          value={code}
+          onChangeText={setCode}
+          placeholder="Código de invitación"
+          placeholderTextColor={theme.textSecondary}
+          autoCapitalize="characters"
+          style={[
+            styles.codeInput,
+            { color: theme.text, backgroundColor: theme.backgroundSelected },
+          ]}
+        />
+        <Pressable
+          onPress={() =>
+            Alert.alert('Próximamente', 'La vinculación con entrenadores estará disponible en breve.')
+          }
+          style={({ pressed }) => [
+            styles.linkButton,
+            { backgroundColor: theme.accent, opacity: pressed ? 0.7 : 1 },
+          ]}>
+          <ThemedText style={styles.linkButtonText}>Vincular</ThemedText>
+        </Pressable>
+      </View>
     </View>
   );
 }
 
 export function ClientProfileView({ client }: { client: ClientProfile }) {
-  const theme = useTheme();
+  const router = useRouter();
   const activeProgram = useActiveProgram();
-  const trainer = client.trainerId
-    ? (MOCK_USERS_MAP[client.trainerId] as TrainerProfile | undefined)
+  const workoutLogs = useWorkoutStore((s) => s.workoutLogs);
+
+  const currentWeek = activeProgram
+    ? getCurrentWeek(
+        activeProgram.totalWeeks,
+        activeProgram.microcycle.trainingDays,
+        workoutLogs
+      )
     : null;
 
   return (
     <View style={styles.content}>
       {/* Avatar + name */}
       <View style={styles.avatarSection}>
-        <View style={[styles.avatar, { backgroundColor: theme.backgroundSelected }]}>
-          <ThemedText style={styles.avatarText}>
-            {client.displayName
-              .split(' ')
-              .map((w) => w[0])
-              .join('')
-              .toUpperCase()
-              .slice(0, 2)}
-          </ThemedText>
-        </View>
+        <ProfileAvatar displayName={client.displayName} photoUrl={client.photoUrl} size={80} />
         <ThemedText type="subtitle">{client.displayName}</ThemedText>
-        <View style={[styles.rolePill, { backgroundColor: '#4CAF50' + '20' }]}>
-          <ThemedText style={[styles.rolePillText, { color: '#4CAF50' }]}>
+        <View style={[styles.rolePill, { backgroundColor: RoleColors.client + '20' }]}>
+          <ThemedText style={[styles.rolePillText, { color: RoleColors.client }]}>
             Cliente
           </ThemedText>
         </View>
       </View>
 
       {/* Personal info */}
-      <ThemedView type="backgroundElement" style={styles.card}>
-        <ThemedText type="smallBold" themeColor="textSecondary" style={styles.cardTitle}>
-          DATOS PERSONALES
-        </ThemedText>
-        <InfoRow label="Email" value={client.email} />
-        <InfoRow label="Teléfono" value={client.phone} />
-        <InfoRow label="Nacimiento" value={client.birthday} />
-        {client.heightCm && <InfoRow label="Altura" value={`${client.heightCm} cm`} />}
-        {client.weightKg && <InfoRow label="Peso" value={`${client.weightKg} kg`} />}
-        {client.goal && <InfoRow label="Objetivo" value={client.goal} />}
-      </ThemedView>
-
-      {/* Trainer info */}
-      <ThemedView type="backgroundElement" style={styles.card}>
-        <ThemedText type="smallBold" themeColor="textSecondary" style={styles.cardTitle}>
-          MI ENTRENADOR
-        </ThemedText>
-        {trainer ? (
-          <View style={styles.trainerRow}>
-            <View style={[styles.trainerAvatar, { backgroundColor: theme.backgroundSelected }]}>
-              <ThemedText style={{ fontWeight: '700', fontSize: 14 }}>
-                {trainer.displayName
-                  .split(' ')
-                  .map((w) => w[0])
-                  .join('')
-                  .toUpperCase()
-                  .slice(0, 2)}
-              </ThemedText>
-            </View>
-            <View style={{ flex: 1, gap: 2 }}>
-              <ThemedText style={{ fontWeight: '600', fontSize: 15 }}>
-                {trainer.displayName}
-              </ThemedText>
-              <ThemedText type="small" themeColor="textSecondary">
-                {trainer.specialties.join(' · ')}
-              </ThemedText>
-            </View>
-          </View>
-        ) : (
-          <View style={styles.noTrainer}>
-            <ThemedText themeColor="textSecondary">Sin entrenador vinculado</ThemedText>
-            <ThemedText type="small" themeColor="textSecondary">
-              Ingresa un código de invitación para vincularte
-            </ThemedText>
+      <ProfileCard title="DATOS PERSONALES">
+        {(client.heightCm || client.weightKg) && (
+          <View style={styles.metricsRow}>
+            {client.heightCm && (
+              <MetricTile value={String(client.heightCm)} unit="cm" label="Altura" />
+            )}
+            {client.weightKg && (
+              <MetricTile value={String(client.weightKg)} unit="kg" label="Peso" />
+            )}
           </View>
         )}
-      </ThemedView>
+        <InfoRow label="Email" value={client.email} />
+        <InfoRow label="Teléfono" value={client.phone} />
+        <InfoRow label="Nacimiento" value={formatBirthday(client.birthday)} />
+        {client.goal && <InfoRow label="Objetivo" value={client.goal} />}
+      </ProfileCard>
+
+      {/* Trainer info */}
+      <ProfileCard title="MI ENTRENADOR">
+        <TrainerCard trainerId={client.trainerId} />
+      </ProfileCard>
 
       {/* Active program */}
-      <ThemedView type="backgroundElement" style={styles.card}>
-        <ThemedText type="smallBold" themeColor="textSecondary" style={styles.cardTitle}>
-          PROGRAMA ACTIVO
-        </ThemedText>
+      <ProfileCard title="PROGRAMA ACTIVO">
         {activeProgram ? (
-          <View style={styles.programInfo}>
-            <ThemedText style={{ fontWeight: '600', fontSize: 15 }}>
-              {activeProgram.name}
-            </ThemedText>
+          <Pressable
+            onPress={() => router.push('/rutina')}
+            style={({ pressed }) => [styles.programInfo, { opacity: pressed ? 0.7 : 1 }]}>
+            <View style={styles.programHeader}>
+              <ThemedText style={styles.nameText}>{activeProgram.name}</ThemedText>
+              <ThemedText type="small" themeColor="textSecondary">→</ThemedText>
+            </View>
             <ThemedText type="small" themeColor="textSecondary">
-              {activeProgram.totalWeeks} semanas ·{' '}
+              Semana {currentWeek} de {activeProgram.totalWeeks} ·{' '}
               {activeProgram.microcycle.daysPerWeek} días/semana
             </ThemedText>
-          </View>
+          </Pressable>
         ) : (
           <ThemedText themeColor="textSecondary">Sin programa activo</ThemedText>
         )}
-      </ThemedView>
+      </ProfileCard>
     </View>
   );
 }
@@ -128,17 +174,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
   },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    fontSize: 28,
-    fontWeight: '700',
-  },
   rolePill: {
     paddingHorizontal: 12,
     paddingVertical: 4,
@@ -148,35 +183,82 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
   },
-  card: {
-    borderRadius: 16,
-    padding: Spacing.three,
+  metricsRow: {
+    flexDirection: 'row',
     gap: Spacing.two,
-  },
-  cardTitle: {
     marginBottom: Spacing.one,
+  },
+  metricTile: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: Spacing.two,
+    borderRadius: 12,
+    gap: Spacing.half,
+  },
+  metricValueRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 4,
+  },
+  metricValue: {
+    fontSize: 22,
+    fontWeight: '700',
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
+  infoValue: {
+    fontSize: 15,
+  },
   trainerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
-  trainerAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  trainerInfo: {
+    flex: 1,
+    gap: Spacing.half,
+  },
+  nameText: {
+    fontWeight: '600',
+    fontSize: 15,
+  },
+  noTrainerState: {
+    gap: Spacing.two,
+  },
+  linkRow: {
+    flexDirection: 'row',
+    gap: Spacing.two,
+    alignItems: 'center',
+  },
+  codeInput: {
+    flex: 1,
+    height: 40,
+    borderRadius: 10,
+    paddingHorizontal: Spacing.two,
+    fontSize: 15,
+    letterSpacing: 1,
+  },
+  linkButton: {
+    height: 40,
+    paddingHorizontal: Spacing.three,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  noTrainer: {
-    gap: 4,
+  linkButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
   },
   programInfo: {
-    gap: 4,
+    gap: Spacing.half,
+  },
+  programHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
 });

@@ -29,6 +29,7 @@ export function DayCard({ name, dayNumber, exerciseCount, totalSets, status, onP
   const pressed = useSharedValue(0);
 
   const tap = Gesture.Tap()
+    .enabled(!!onPress)
     .onBegin(() => {
       pressed.set(withTiming(1, { duration: 100 }));
     })
@@ -40,7 +41,7 @@ export function DayCard({ name, dayNumber, exerciseCount, totalSets, status, onP
     });
 
   const animatedStyle = useAnimatedStyle(() => ({
-    opacity: onPress ? interpolate(pressed.get(), [0, 1], [1, 0.72]) : 1,
+    opacity: interpolate(pressed.get(), [0, 1], [1, 0.72]),
   }));
 
   const statusColor =
