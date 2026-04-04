@@ -10,7 +10,9 @@
       "Bash(npx expo:*)",
       "Bash(node:*)",
       "Bash(kill %1)",
-      "Read(//dev/**)"
+      "Read(//dev/**)",
+      "Bash(npx eslint:*)",
+      "Bash(git stash:*)"
     ]
   }
 }

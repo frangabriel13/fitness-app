@@ -46,16 +46,6 @@ export function useActiveProgram(): Program | null {
   return null;
 }
 
-/** Templates del trainer actual */
-export function useTrainerTemplates(): Program[] {
-  const user = useCurrentUser();
-  const programs = useProgramStore((s) => s.programs);
-  if (user.role !== 'trainer') return [];
-  return Object.values(programs).filter(
-    (p) => p.trainerId === user.id && p.type === 'template'
-  );
-}
-
 /** Programas asignados por el trainer actual */
 export function useTrainerAssignedPrograms(): Program[] {
   const user = useCurrentUser();

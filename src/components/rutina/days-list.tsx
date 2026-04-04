@@ -47,7 +47,7 @@ export function DaysList({ days, selectedWeek, workoutLogs }: Props) {
               exerciseCount={day.exercises.length}
               totalSets={totalSets}
               status={status}
-              onPress={() => router.push(`/workout/${day.id}`)}
+              onPress={() => router.push(`/workout/${day.id}?week=${selectedWeek}`)}
             />
           );
         })}

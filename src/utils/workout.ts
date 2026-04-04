@@ -1,4 +1,4 @@
-import type { ActiveSession, Program, SetLog, TrainingDay, WorkoutLog } from '@/types';
+import type { Program, SetLog, TrainingDay, WorkoutLog } from '@/types';
 
 export type WeekStatus = 'completed' | 'active' | 'upcoming';
 
@@ -55,19 +55,6 @@ export function generateAllWorkoutLogs(
   }
 
   return logs;
-}
-
-/**
- * Crea el estado inicial de una sesión activa.
- */
-export function createActiveSession(workoutLogId: string): ActiveSession {
-  return {
-    workoutLogId,
-    currentExerciseIndex: 0,
-    currentSetIndex: 0,
-    phase: 'exercising',
-    restTimeRemaining: 0,
-  };
 }
 
 /**

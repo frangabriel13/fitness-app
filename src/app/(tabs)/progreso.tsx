@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   container: {
-    paddingHorizontal: 8,
+    paddingHorizontal: Spacing.two,
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
   chipRow: {
     flexDirection: 'row',
     gap: 8,
-    paddingHorizontal: Spacing.one,
+    paddingHorizontal: Spacing.two,
   },
   chip: {
     paddingHorizontal: 16,
