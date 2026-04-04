@@ -60,9 +60,10 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
     alignSelf: 'center',
     width: '100%',
-    gap: Spacing.three,
   },
-  header: {},
+  header: {
+    marginBottom: Spacing.one,
+  },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'baseline',
