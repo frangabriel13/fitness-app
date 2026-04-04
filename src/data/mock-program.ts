@@ -473,26 +473,6 @@ const MICROCYCLE_DEFAULT: Microcycle = {
   ],
 };
 
-/**
- * Copia del microciclo de hipertrofia con IDs únicos para Carlos (trainer como cliente).
- * Evita colisión de workout log keys con prog_001 (Ana García), que comparte la misma estructura.
- */
-const MICROCYCLE_HIPERTROFIA_4D_CARLOS: Microcycle = (() => {
-  let n = 1;
-  return {
-    id: 'micro_003',
-    daysPerWeek: 4,
-    trainingDays: MICROCYCLE_HIPERTROFIA_4D.trainingDays.map((day, di) => ({
-      ...day,
-      id: `day_c0${di + 1}`,
-      exercises: day.exercises.map((ex) => ({
-        ...ex,
-        id: `ex_c${String(n++).padStart(2, '0')}`,
-      })),
-    })),
-  };
-})();
-
 // --- Programas ---
 
 /** Template: plantilla del trainer, no asignada a ningún cliente */
@@ -546,7 +526,7 @@ export const MOCK_PROGRAM_CARLOS: Program = {
   trainerId: 'user_trainer_001',
   type: 'assigned',
   originTemplateId: 'tmpl_001',
-  microcycle: MICROCYCLE_HIPERTROFIA_4D_CARLOS,
+  microcycle: MICROCYCLE_HIPERTROFIA_4D,
   createdAt: '2024-03-01T10:00:00Z',
   updatedAt: '2024-03-01T10:00:00Z',
 };

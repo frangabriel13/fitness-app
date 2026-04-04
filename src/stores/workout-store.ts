@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 import type { ActiveSession, WorkoutLog } from '@/types';
-import { MOCK_WORKOUT_LOGS_ANA } from '@/data/mock-workout-logs';
 import { mmkvStorage } from './storage';
 
 interface WorkoutState {
@@ -20,7 +19,7 @@ interface WorkoutState {
 export const useWorkoutStore = create<WorkoutState>()(
   persist(
     (set) => ({
-      workoutLogs: MOCK_WORKOUT_LOGS_ANA,
+      workoutLogs: {},
       activeSession: null,
 
       setWorkoutLogs: (logs) => set({ workoutLogs: logs }),

@@ -1,35 +1,24 @@
-import '@/global.css';
-
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
 import React from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
+import AppTabs from '@/components/app-tabs';
 import { LoginScreen } from '@/components/login-screen';
 import { useAuthStore } from '@/stores/auth-store';
-import { useTheme } from '@/hooks/use-theme';
 
 function AppContent() {
   const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
-  const theme = useTheme();
-
   if (!isLoggedIn) return <LoginScreen />;
-
   return (
     <>
       <AnimatedSplashOverlay />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: theme.background },
-        }}
-      />
+      <AppTabs />
     </>
   );
 }
 
-export default function RootLayout() {
+export default function TabLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <ThemeProvider value={DarkTheme}>

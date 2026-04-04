@@ -1,6 +1,5 @@
 import { ThemedText } from '@/components/themed-text';
 import { MOCK_USERS } from '@/data/mock-users';
-import { MOCK_WORKOUT_LOGS_BY_USER } from '@/data/mock-workout-logs';
 import { useTheme } from '@/hooks/use-theme';
 import { useAuthStore, useCurrentUser } from '@/stores/auth-store';
 import { useWorkoutStore } from '@/stores/workout-store';
@@ -81,12 +80,12 @@ export function DevRoleSwitcher() {
   const theme = useTheme();
   const currentUser = useCurrentUser();
   const switchUser = useAuthStore((s) => s.switchUser);
-  const setWorkoutLogs = useWorkoutStore((s) => s.setWorkoutLogs);
+  const clearWorkouts = useWorkoutStore((s) => s.clearAll);
   const [visible, setVisible] = useState(false);
 
   const handleSelect = (userId: string) => {
     if (userId !== currentUser.id) {
-      setWorkoutLogs(MOCK_WORKOUT_LOGS_BY_USER[userId] ?? {});
+      clearWorkouts();
       switchUser(userId);
     }
     setVisible(false);
