@@ -1,8 +1,8 @@
 import { ThemedText } from '@/components/themed-text';
 import { DayCard } from '@/components/rutina/day-card';
 import { Spacing } from '@/constants/theme';
-import type { TrainingDay } from '@/types';
-import type { WorkoutLog } from '@/types';
+import { useTheme } from '@/hooks/use-theme';
+import type { TrainingDay, WorkoutLog } from '@/types';
 import { StyleSheet, View } from 'react-native';
 
 type Props = {
@@ -12,16 +12,26 @@ type Props = {
 };
 
 export function DaysList({ days, selectedWeek, workoutLogs }: Props) {
+  const theme = useTheme();
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <ThemedText type="smallBold" themeColor="textSecondary">
-          DÍAS — SEMANA {selectedWeek}
-        </ThemedText>
-        <ThemedText type="small" themeColor="textSecondary">
-          {days.length} días
-        </ThemedText>
+        <View style={styles.headerLabel}>
+          <ThemedText style={styles.sectionLabel} themeColor="textSecondary">
+            SEMANA
+          </ThemedText>
+          <ThemedText style={[styles.weekNumber, { color: theme.accent }]}>
+            {selectedWeek}
+          </ThemedText>
+        </View>
+        <View style={[styles.countBadge, { backgroundColor: theme.backgroundSelected }]}>
+          <ThemedText style={[styles.countText, { color: theme.textSecondary }]}>
+            {days.length} días
+          </ThemedText>
+        </View>
       </View>
+
       <View style={styles.list}>
         {days.map((day) => {
           const logKey = `${day.id}_w${selectedWeek}`;
@@ -52,6 +62,32 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.one,
+  },
+  headerLabel: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: Spacing.one,
+  },
+  sectionLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 1.2,
+    textTransform: 'uppercase',
+  },
+  weekNumber: {
+    fontSize: 22,
+    fontWeight: '800',
+    lineHeight: 26,
+  },
+  countBadge: {
+    borderRadius: 20,
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.one,
+  },
+  countText: {
+    fontSize: 12,
+    fontWeight: '500',
+    lineHeight: 16,
   },
   list: {
     gap: Spacing.two,

@@ -67,3 +67,9 @@ export const Spacing = {
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
+
+export const RoleColors = {
+  client: '#4CAF50',
+  trainer: '#FF6B35',
+  danger: '#E05252',
+} as const;

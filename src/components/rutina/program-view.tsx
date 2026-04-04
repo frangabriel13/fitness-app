@@ -1,18 +1,19 @@
-import { DaysList } from '@/components/rutina/days-list';
+import { ProgramHeader } from '@/components/rutina/program-header';
 import { WeekSelector } from '@/components/rutina/week-selector';
-import { ThemedText } from '@/components/themed-text';
+import { DaysList } from '@/components/rutina/days-list';
+import { Spacing } from '@/constants/theme';
 import { useInitializeWorkoutLogs } from '@/hooks/use-initialize-workout-logs';
 import { useWorkoutStore } from '@/stores/workout-store';
+import { getWeekStatus, getCurrentWeek } from '@/utils/workout';
 import type { Program } from '@/types';
-import { getCurrentWeek, getWeekStatus } from '@/utils/workout';
 import { useState } from 'react';
-import { View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
 export function ProgramView({ program }: { program: Program }) {
   useInitializeWorkoutLogs(program);
 
   const workoutLogs = useWorkoutStore((s) => s.workoutLogs);
-  const { totalWeeks, name, microcycle } = program;
+  const { totalWeeks, microcycle } = program;
   const days = microcycle.trainingDays;
 
   const currentWeek = getCurrentWeek(totalWeeks, days, workoutLogs);
@@ -22,21 +23,17 @@ export function ProgramView({ program }: { program: Program }) {
   const weekStatusMap = Object.fromEntries(
     weeks.map((w) => [w, getWeekStatus(w, days, workoutLogs)])
   );
-  const completedCount = weeks.filter((w) => weekStatusMap[w] === 'completed').length;
+  const completedWeeks = weeks.filter((w) => weekStatusMap[w] === 'completed').length;
 
   return (
-    <View style={{ gap: 12 }}>
-      <ThemedText type="small" themeColor="textSecondary">
-        {name} · {totalWeeks} semanas
-      </ThemedText>
+    <View style={styles.container}>
+      <ProgramHeader program={program} completedWeeks={completedWeeks} />
 
       <WeekSelector
         weeks={weeks}
         weekStatusMap={weekStatusMap}
         currentWeek={currentWeek}
         selectedWeek={selectedWeek}
-        totalWeeks={totalWeeks}
-        completedCount={completedCount}
         onSelectWeek={setSelectedWeek}
       />
 
@@ -48,3 +45,9 @@ export function ProgramView({ program }: { program: Program }) {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    gap: Spacing.three,
+  },
+});
